@@ -1,0 +1,7 @@
+Inter-latin-wght.woff2 — Inter v4 (Google Fonts "inter/v20"), latin subset,
+variable weight axis, served for font-weight 400–700.
+
+These are the exact bytes embedded in the Identity & Surfaces design export
+(page 05, asset 1d0ef025-2966-40a5-8b6f-8a41edf75d66), i.e. the font the
+design plate itself was rendered with. Unicode range matches Google's
+"latin" subset declaration. Licence: SIL OFL 1.1 (OFL-1.1.txt).

@@ -1,0 +1,2628 @@
+{
+ "schema": "permission-vocabulary/v1",
+ "description": "Cloudflare API-token permission-group names and the resource nouns derived from them, for the lexical scope gate (scripts/scope-mentions.mjs, test/unit/pv-deploy-token-scopes.test.mjs). The gate detects these names and '<noun> Edit|Read|Write|Revoke'-style shapes outside the generated deploy-token-scopes tables; it does not understand free prose (V2-QA-8, accepted residual: docs/v2/threat-model.md T8). names: every Name cell of every table under User/Account/Zone permissions on the source page (read as raw markdown, index.md); nouns: derived by scripts/scope-mentions.mjs deriveNouns(names), checked by test; abbreviations and allowedPhrases: authored, each with its reason.",
+ "source": {
+  "url": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+  "raw": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/index.md",
+  "read": "2026-09-28",
+  "sha256": "3c8b8d9150eaf35e7ee56391172df9767643fafa4d7ca27f4ddc4c9d6d57a9d0",
+  "extraction": "every table row under ## User|Account|Zone permissions, first cell, de-duplicated per scope"
+ },
+ "names": [
+  {
+   "name": "API Tokens Read",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Tokens Edit",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Memberships Read",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Memberships Edit",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "User Details Read",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "User Details Edit",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Tokens Write",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Memberships Write",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "User Details Write",
+   "scope": "user",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Revoke",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps Revoke",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Audit Logs Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Custom Pages Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Custom Pages Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Device Posture Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Device Posture Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Groups Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Groups Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Identity Providers Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Identity Providers Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Keys Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Keys Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Mutual TLS Certificates Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Mutual TLS Certificates Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations Revoke",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations, Identity Providers, and Groups Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations, Identity Providers, and Groups Revoke",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations, Identity Providers, and Groups Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policies Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policies Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policy Test Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policy Test Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Population Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Population Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: SCIM Logs Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Service Tokens Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Service Tokens Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: SSH Auditing Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: SSH Auditing Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Tags Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Tags Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Users Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Users Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Analytics Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Custom Pages Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Custom Pages Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Filter Lists Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Filter Lists Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Firewall Access Rules Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Firewall Access Rules Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Rulesets Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Rulesets Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Security Center Insights",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Security Center Insights Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Settings Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Settings Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account: SSL and Certificates Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account: SSL and Certificates Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account WAF Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account WAF Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Address Maps Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Address Maps Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "AI Gateway Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "AI Gateway Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "AI Gateway Run",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Allow Request Tracer Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Gateway Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Gateway Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Billing Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Billing Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bulk URL Redirects Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bulk URL Redirects Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "China Network Steering Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "China Network Steering Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudchamber Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudchamber Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Realtime Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Realtime Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare CASB Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare CASB Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare DEX Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare DEX Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Images Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Images Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: cloudflared Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: cloudflared Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: WARP Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: WARP Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connectors Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connectors Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Networks Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Networks Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Pages Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Pages Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Tunnel Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Tunnel Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudforce One Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudforce One Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Security Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Security Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Constellation Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Constellation Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Containers Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Containers Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "D1 Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "D1 Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Botnet Feed Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Botnet Feed Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Protection Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Protection Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DNS Firewall Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DNS Firewall Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Addresses Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Addresses Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Hyperdrive Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Hyperdrive Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Intel Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Intel Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Integration Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IOT Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IOT Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: BGP On Demand Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: BGP On Demand Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "L3/4 DDoS Managed Ruleset Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "L3/4 DDoS Managed Ruleset Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancing: Monitors and Pools Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancing: Monitors and Pools Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Packet Captures Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Packet Captures Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Network Monitoring Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Network Monitoring Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Transit Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Transit Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Notifications Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Notifications Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Client-side security Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Client-side security Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Pipelines Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Pipelines Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Queues Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Queues Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Rule Policies Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Rule Policies Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Stream Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Stream Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Transform Rules Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Transform Rules Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Turnstile Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Turnstile Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "URL Scanner Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "URL Scanner Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Vectorize Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Vectorize Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers AI Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers AI Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers CI Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers CI Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers KV Storage Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers KV Storage Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers R2 Storage Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers R2 Storage Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Scripts Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Scripts Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Tail Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust Report",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust: PII Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust: Seats Edit",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Custom Pages Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Device Posture Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Groups Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Identity Providers Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Keys Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Mutual TLS Certificates Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Organizations, Identity Providers, and Groups Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policies Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Policy Test Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Population Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Service Tokens Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: SSH Auditing Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Tags Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Users Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Custom Pages Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Rule Lists Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Rule Lists Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Firewall Access Rules Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Rulesets Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Security Center Insights Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account Settings Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account: SSL and Certificates Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account WAF Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Address Maps Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account API Gateway Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Account API Gateway Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Billing Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Mass URL Redirects Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Mass URL Redirects Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "China Network Steering Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudchamber Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Realtime Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Realtime Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare CASB Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare DEX Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Images Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Images Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: cloudflared Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connector: WARP Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Connectors Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare One Networks Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Pages Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Pages Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudflare Tunnel Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloudforce One Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloud Email Security: Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloud Email Security: Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Constellation Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Containers Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "D1 Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Botnet Feed Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DDoS Protection Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DNS Firewall Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Addresses Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Hyperdrive Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Intel Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Integration Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IOT Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "IP Prefixes: BGP On Demand Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "L4 DDoS Managed Ruleset Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "L4 DDoS Managed Ruleset Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancing: Monitors and Pools Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Packet Captures - Read PCAPs API",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Firewall Packet Captures - Write PCAPs API",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Network Monitoring Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Magic Transit Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Notifications Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Page Shield Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Page Shield Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Pipelines Read",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Pipelines Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Queues Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Rule Policies Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Stream Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Transform Rules Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Turnstile Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "URL Scanner Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Vectorize Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers AI Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers CI Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers KV Storage Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers R2 Storage Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Scripts Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zero Trust: Seats Write",
+   "scope": "account",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Revoke",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Analytics Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Gateway Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "API Gateway Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Apps Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Feedback Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Feedback Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cache Purge",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cache Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cache Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloud Connector Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloud Connector Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Config Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Config Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Error Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Error Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Pages Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Pages Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Dmarc Management Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Dmarc Management Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DNS Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "DNS Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Firewall Services Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Firewall Services Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Health Checks Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Health Checks Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "HTTP DDoS Managed Ruleset Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "HTTP DDoS Managed Ruleset Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancers Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancers Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Managed Headers Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Managed Headers Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Origin Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Origin Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Page Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Page Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Client-side security Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Client-side security Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Response Compression Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Response Compression Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Sanitize Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Sanitize Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Single Redirect Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Single Redirect Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "SSL and Certificates Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "SSL and Certificates Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Transform Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Transform Rules Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Waiting Room Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Waiting Room Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Web3 Hostnames Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Web3 Hostnames Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Routes Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Routes Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zaraz Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zaraz Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Security Center Insights",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Security Center Insights Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Settings Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Settings Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Versioning Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Versioning Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone WAF Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone WAF Edit",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Access: Apps and Policies Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Domain API Gateway Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Domain API Gateway Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Apps Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Bot Management Feedback Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cache Settings Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cache Settings Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Cloud Connector Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Config Settings Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Config Settings Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Errors Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Errors Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Custom Pages Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Security DMARC Reports Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Security DMARC Reports Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Email Routing Rules Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Firewall Services Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Health Checks Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "HTTP DDoS Managed Ruleset Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Load Balancers Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Logs Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Managed headers Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Managed headers Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Origin Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Origin Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Page Rules Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Domain Page Shield Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Domain Page Shield Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Response Compression Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Sanitize Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Dynamic URL Redirects Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Dynamic URL Redirects Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "SSL and Certificates Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Transform Rules Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Transform Rules Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Waiting Rooms Read",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Waiting Rooms Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Web3 Hostnames Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Workers Routes Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zaraz Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Security Center Insights Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Settings Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone Versioning Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  },
+  {
+   "name": "Zone WAF Write",
+   "scope": "zone",
+   "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/",
+   "read": "2026-09-28"
+  }
+ ],
+ "nouns": [
+  "AI Gateway",
+  "API Gateway",
+  "API Tokens",
+  "Access: Apps",
+  "Access: Apps and Policies",
+  "Access: Audit Logs",
+  "Access: Custom Pages",
+  "Access: Device Posture",
+  "Access: Groups",
+  "Access: Identity Providers",
+  "Access: Keys",
+  "Access: Mutual TLS Certificates",
+  "Access: Organizations",
+  "Access: Organizations, Identity Providers, and Groups",
+  "Access: Policies",
+  "Access: Policy Test",
+  "Access: Population",
+  "Access: SCIM Logs",
+  "Access: SSH Auditing",
+  "Access: Service Tokens",
+  "Access: Tags",
+  "Access: Users",
+  "Account API Gateway",
+  "Account Analytics",
+  "Account Custom Pages",
+  "Account Filter Lists",
+  "Account Firewall Access Rules",
+  "Account Rule Lists",
+  "Account Rulesets",
+  "Account Security Center Insights",
+  "Account Settings",
+  "Account WAF",
+  "Account: SSL and Certificates",
+  "Address Maps",
+  "Allow Request Tracer",
+  "Analytics",
+  "Apps",
+  "Billing",
+  "Bot Management",
+  "Bot Management Feedback",
+  "Bulk URL Redirects",
+  "Cache Purge",
+  "Cache Rules",
+  "Cache Settings",
+  "China Network Steering",
+  "Client-side security",
+  "Cloud Connector",
+  "Cloud Email Security",
+  "Cloudchamber",
+  "Cloudflare CASB",
+  "Cloudflare DEX",
+  "Cloudflare Images",
+  "Cloudflare One Connector: WARP",
+  "Cloudflare One Connector: cloudflared",
+  "Cloudflare One Connectors",
+  "Cloudflare One Networks",
+  "Cloudflare Pages",
+  "Cloudflare Realtime",
+  "Cloudflare Tunnel",
+  "Cloudforce One",
+  "Config Rules",
+  "Config Settings",
+  "Constellation",
+  "Containers",
+  "Custom Error Rules",
+  "Custom Errors",
+  "Custom Pages",
+  "D1",
+  "DDoS Botnet Feed",
+  "DDoS Protection",
+  "DNS",
+  "DNS Firewall",
+  "Dmarc Management",
+  "Domain API Gateway",
+  "Domain Page Shield",
+  "Dynamic URL Redirects",
+  "Email Routing Addresses",
+  "Email Routing Rules",
+  "Email Security",
+  "Email Security DMARC Reports",
+  "Firewall Services",
+  "HTTP DDoS Managed Ruleset",
+  "Health Checks",
+  "Hyperdrive",
+  "IOT",
+  "IP Prefixes",
+  "IP Prefixes: BGP On Demand",
+  "Images",
+  "Integration",
+  "Intel",
+  "L3/4 DDoS Managed Ruleset",
+  "L4 DDoS Managed Ruleset",
+  "Load Balancers",
+  "Load Balancing: Monitors and Pools",
+  "Logs",
+  "Magic Firewall",
+  "Magic Firewall Packet Captures",
+  "Magic Network Monitoring",
+  "Magic Transit",
+  "Managed Headers",
+  "Managed headers",
+  "Mass URL Redirects",
+  "Memberships",
+  "Notifications",
+  "Origin",
+  "Origin Rules",
+  "Page Rules",
+  "Page Shield",
+  "Pages",
+  "Pipelines",
+  "Queues",
+  "Realtime",
+  "Response Compression",
+  "Rule Policies",
+  "SSL and Certificates",
+  "Sanitize",
+  "Single Redirect",
+  "Stream",
+  "Transform Rules",
+  "Turnstile",
+  "URL Scanner",
+  "User Details",
+  "Vectorize",
+  "Waiting Room",
+  "Waiting Rooms",
+  "Web3 Hostnames",
+  "Workers AI",
+  "Workers CI",
+  "Workers KV Storage",
+  "Workers Pipelines",
+  "Workers R2 Storage",
+  "Workers Routes",
+  "Workers Scripts",
+  "Workers Tail",
+  "Zaraz",
+  "Zero Trust",
+  "Zero Trust: PII",
+  "Zero Trust: Seats",
+  "Zone",
+  "Zone Security Center Insights",
+  "Zone Settings",
+  "Zone Transform Rules",
+  "Zone Versioning",
+  "Zone WAF"
+ ],
+ "abbreviations": [
+  {
+   "noun": "R2",
+   "bare": false,
+   "why": "short form of Workers R2 Storage (\"R2 Edit\", \"r2 write\")"
+  },
+  {
+   "noun": "R2 Storage",
+   "bare": false,
+   "why": "short form of Workers R2 Storage"
+  },
+  {
+   "noun": "KV",
+   "bare": false,
+   "why": "short form of Workers KV Storage"
+  },
+  {
+   "noun": "Workers KV",
+   "bare": false,
+   "why": "short form of Workers KV Storage"
+  },
+  {
+   "noun": "Workers Script",
+   "bare": false,
+   "why": "singular of Workers Scripts"
+  },
+  {
+   "noun": "Workers Route",
+   "bare": false,
+   "why": "singular of Workers Routes"
+  },
+  {
+   "noun": "Service Tokens",
+   "bare": false,
+   "why": "Access: Service Tokens without its prefix"
+  },
+  {
+   "noun": "Service Token",
+   "bare": false,
+   "why": "singular, without the Access: prefix"
+  },
+  {
+   "noun": "Tunnel",
+   "bare": false,
+   "why": "short form of Cloudflare Tunnel"
+  },
+  {
+   "noun": "Apps and Policies",
+   "bare": true,
+   "why": "Access: Apps and Policies without its prefix"
+  },
+  {
+   "noun": "Organizations, Identity Providers, and Groups",
+   "bare": true,
+   "why": "the Access: organizations permission without its prefix"
+  },
+  {
+   "noun": "Global API Key",
+   "bare": true,
+   "why": "an all-scope credential (V2-QA-8 optional item): never to be named outside the generated tables"
+  },
+  {
+   "noun": "Super Administrator",
+   "bare": true,
+   "why": "the account's all-scope role (V2-QA-8 optional item): never to be named outside the generated tables"
+  }
+ ],
+ "allowedPhrases": [
+  {
+   "file": "docs/v2/cloudflare/coverage.md",
+   "phrase": "Zero Trust \u2192 Access controls",
+   "count": 1,
+   "why": "a Cloudflare dashboard navigation label the coverage matrix quotes exactly"
+  },
+  {
+   "file": "docs/v2/cloudflare/coverage.md",
+   "phrase": "docs/resources/zero_trust_access_service_token.md",
+   "count": 1,
+   "why": "a provider-docs URL for that resource type, not a permission"
+  },
+  {
+   "file": "docs/v2/cloudflare/coverage.md",
+   "phrase": "docs/resources/zero_trust_access_application.md",
+   "count": 1,
+   "why": "a provider-docs URL for that resource type, not a permission"
+  },
+  {
+   "file": "docs/v2/cloudflare/coverage.md",
+   "phrase": "docs/resources/zero_trust_access_policy.md",
+   "count": 1,
+   "why": "a provider-docs URL for that resource type, not a permission"
+  },
+  {
+   "file": "docs/v2/cloudflare/runbook.md",
+   "phrase": "**Account API Tokens**",
+   "count": 2,
+   "why": "a Cloudflare dashboard navigation label the runbook must quote exactly"
+  },
+  {
+   "file": "docs/v2/cloudflare/runbook.md",
+   "phrase": "**Zero Trust**",
+   "count": 2,
+   "why": "a Cloudflare dashboard navigation label the runbook must quote exactly"
+  },
+  {
+   "file": "docs/v2/cloudflare/runbook.md",
+   "phrase": "In Zero Trust,",
+   "count": 1,
+   "why": "the Zero Trust dashboard, named as a place in teardown step 2, not a permission"
+  },
+  {
+   "file": "docs/v2/cloudflare/runbook-public.md",
+   "phrase": "**Manage Account** → **Account API Tokens**",
+   "count": 2,
+   "why": "the Cloudflare dashboard breadcrumb the public runbook must quote exactly (steps P2 and P6), not a permission"
+  }
+ ]
+}

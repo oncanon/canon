@@ -1,0 +1,15 @@
+{
+  "schema": "doc/v1",
+  "id": "b",
+  "title": "Page B",
+  "description": "The second page in a minimal, fully-resolving doc set.",
+  "sections": [
+    {
+      "id": "details",
+      "title": "Details",
+      "blocks": [
+        { "type": "paragraph", "text": "Nothing more to see here." }
+      ]
+    }
+  ]
+}

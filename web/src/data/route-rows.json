@@ -1,0 +1,8 @@
+[
+  { "route": "/a/<alias>/", "audience": "Human entry · 307 to current edition", "caching": "no-store" },
+  { "route": "/a/<alias>/report.md", "audience": "Agent Markdown entry", "caching": "no-store" },
+  { "route": "/a/<alias>.json", "audience": "Alias record · contentId, generation", "caching": "no-store" },
+  { "route": "/p/sha256-<hex>/", "audience": "Permanent human edition", "caching": "immutable" },
+  { "route": "/p/sha256-<hex>/manifest.json", "audience": "Inventory, sizes, digests", "caching": "immutable" },
+  { "route": "/healthz", "audience": "Daemon health probe", "caching": "no-store" }
+]

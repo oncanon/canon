@@ -1,0 +1,34 @@
+---
+// The "Fingerprint" mark: an 8x8 grid, one cell per nibble of a content ID
+// (four slate steps + cobalt for "f"). Per the identity spec it belongs
+// "wherever a content ID appears" — colophons, alias rows, receipts.
+// This docs site has no real content ID, so it's used here purely as the
+// footer's brand motif with no digest text attached (dropping the design's
+// literal "sha256-0ce5d7a0" would otherwise be a false verification claim —
+// see the dropped "verified on every read" line in Footer.astro).
+interface Props {
+  size?: number;
+}
+const { size = 36 }: Props = Astro.props;
+
+// Row-major 8x8, taken verbatim from the design's footer mark.
+const grid = [
+  "#1e293b", "#f1f5f9", "#f1f5f9", "#475569", "#f1f5f9", "#475569", "#9ca3af", "#1e293b",
+  "#f1f5f9", "#f1f5f9", "#9ca3af", "#475569", "#475569", "#1e293b", "#475569", "#9ca3af",
+  "#1e293b", "#475569", "#f1f5f9", "#9ca3af", "#f1f5f9", "#1e293b", "#f1f5f9", "#60a5fa",
+  "#9ca3af", "#f1f5f9", "#9ca3af", "#9ca3af", "#9ca3af", "#1e293b", "#475569", "#1e293b",
+  "#9ca3af", "#475569", "#1e293b", "#475569", "#1e293b", "#9ca3af", "#1e293b", "#1e293b",
+  "#f1f5f9", "#9ca3af", "#9ca3af", "#9ca3af", "#1e293b", "#1e293b", "#f1f5f9", "#9ca3af",
+  "#f1f5f9", "#f1f5f9", "#f1f5f9", "#9ca3af", "#1e293b", "#475569", "#475569", "#475569",
+  "#1e293b", "#f1f5f9", "#f1f5f9", "#f1f5f9", "#f1f5f9", "#1e293b", "#f1f5f9", "#475569",
+];
+const cell = 7;
+const gap = 1;
+const step = cell + gap;
+const viewBoxSize = step * 8 - gap;
+---
+<svg width={size} height={size} viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} aria-hidden="true" focusable="false">
+  {grid.map((fill, i) => (
+    <rect x={(i % 8) * step} y={Math.floor(i / 8) * step} width={cell} height={cell} rx="1" fill={fill} />
+  ))}
+</svg>

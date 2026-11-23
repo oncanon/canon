@@ -1,0 +1,79 @@
+---
+import { execSync } from "node:child_process";
+import Fingerprint from "./brand/Fingerprint.astro";
+import { BASE } from "../lib/base";
+import { MANIFEST_URL, canonManifest } from "../lib/canon";
+
+// page05's footer is: fingerprint mark (44px) · one line of text (flex 1 1
+// 300px) · a mono ID in #93c5fd on the right. Two parts of it were false for
+// this site and are replaced; the layout is kept:
+//   - "These docs are a Canon edition, verified on every read." The docs are
+//     an Astro build, not a Canon edition, and nothing re-verifies them on
+//     read. Replaced with a plain statement of what the site is.
+//   - "sha256-0ce5d7a0", a made-up content digest. Replaced with the git
+//     commit the site was built from, labelled as a commit so it can't be
+//     read as a Canon content ID.
+function sourceCommit(): string {
+  const fromEnv = process.env.CF_PAGES_COMMIT_SHA || process.env.GITHUB_SHA;
+  if (fromEnv) return fromEnv.slice(0, 7);
+  try {
+    return execSync("git rev-parse --short=7 HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
+const commit = sourceCommit();
+// The Canon edition of the doc/v1 pages (manifest.edition, a content hash of
+// the published manifest), linked to that manifest. Shown short, like page05's
+// mono ID; the full value is in the title and the manifest. Absent only in the
+// build's throwaway anchors pass.
+const edition = canonManifest()?.edition;
+---
+<footer class="footer">
+  <div class="u-container footer__row">
+    <Fingerprint size={44} />
+    <span class="footer__note">
+      Canon is open source. These docs are a static site built from its repository:{" "}
+      <a href="https://github.com/oncanon/canon">GitHub</a>{" · "}
+      <a href={`${BASE}open-source/`}>License &amp; open source</a>
+    </span>
+    <span class="footer__id">
+      {edition && (
+        <>
+          <a href={MANIFEST_URL} title={`Canon edition of the Guide pages: ${edition}`}>edition {edition.slice(0, 15)}</a>
+          <span aria-hidden="true">{" · "}</span>
+        </>
+      )}
+      <span title="Git commit these docs were built from">commit {commit}</span>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    /* page05 footer: background #0f172a, text #9ca3af; always dark. */
+    background: #0f172a;
+    color: #9ca3af;
+    line-height: normal;
+  }
+  .footer__row {
+    /* page05: padding 28px 20px; flex-wrap; gap 14px 28px; align-items
+       center; 13px. */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 28px;
+    padding-block: 28px;
+    font-size: 13px;
+  }
+  .footer__note { flex: 1 1 300px; }
+  .footer__note a { color: #e2e8f0; }
+  .footer__id {
+    /* page05: JetBrains Mono 700, #93c5fd. */
+    font-family: var(--font-code);
+    font-weight: 700;
+    color: #93c5fd;
+  }
+  .footer__id a { color: inherit; text-decoration: none; }
+  .footer__id a:hover { text-decoration: underline; }
+</style>

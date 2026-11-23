@@ -1,0 +1,152 @@
+{
+ "about": "Every identifier-shaped match the identifier gate finds in tracked source (scripts/, src/, test/), each with its reason. Keyed by file, kind and the sha256 of the matched text (never the text). The standing test (test/unit/source-identifiers.test.mjs) requires the findings to equal this list exactly: a new finding fails, and so does a listed one that is gone. Edit this list directly, with a reason; never regenerate it to make a finding pass.",
+ "exceptions": [
+  {
+   "file": "scripts/red-controls.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "8ec256b65e7e1bf9b2967b46d20b2fb16362411026d763e9431e1b695f1cf125",
+   "count": 2,
+   "reason": "control find/replace strings quoting the exact source line they mutate: a code line that reads a request header into a variable"
+  },
+  {
+   "file": "src/publication/mocks/cloudflare-worker.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "72959dfe7f3476671dfae6b6971ef05e70f91a23a27922b7c08efbab7b5b7cdf",
+   "count": 2,
+   "reason": "a heuristic match on a property access that reads the mock client's secret field, not a value"
+  },
+  {
+   "file": "src/publication/worker/index.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "8ec256b65e7e1bf9b2967b46d20b2fb16362411026d763e9431e1b695f1cf125",
+   "count": 1,
+   "reason": "a heuristic match on code that reads the access assertion request header into a variable, not a value"
+  },
+  {
+   "file": "test/corpus/cases.mjs",
+   "kind": "an email address",
+   "sha256": "97fb39eeaf641d39fbda4c75f86492b170ca0e6d092c4c2f77ce8003caddafa9",
+   "count": 1,
+   "reason": "markdown boundary inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/iac-cases.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "56dc9ad0995f7669d90a706778d6b0e70a6c7072f74e7e13787ad8727f32e5af",
+   "count": 1,
+   "reason": "IaC refusal cases: planted synthetic principals (repeated-digit accounts) and a fake token that the scanners must refuse"
+  },
+  {
+   "file": "test/md-boundary-model.mjs",
+   "kind": "an email address",
+   "sha256": "ebb18a030bf15174f5714e24d63af1a81355c951ea7389bd2a9bd18e3d0c2477",
+   "count": 1,
+   "reason": "markdown boundary inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/unit/e2-markdown-boundary-property.test.mjs",
+   "kind": "an email address",
+   "sha256": "ebb18a030bf15174f5714e24d63af1a81355c951ea7389bd2a9bd18e3d0c2477",
+   "count": 1,
+   "reason": "markdown boundary inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/unit/e2-markdown-safety-property.test.mjs",
+   "kind": "an email address",
+   "sha256": "cafd27b854e19a79725ba6279425d5b150e5b1589844cdc13ab99f97514162a4",
+   "count": 1,
+   "reason": "markdown autolink inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/unit/e2-markdown-safety-property.test.mjs",
+   "kind": "an email address",
+   "sha256": "ebb18a030bf15174f5714e24d63af1a81355c951ea7389bd2a9bd18e3d0c2477",
+   "count": 4,
+   "reason": "markdown autolink inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/unit/e8-boundary-expanded.test.mjs",
+   "kind": "an email address",
+   "sha256": "af3c82544f648b38dc7d403473bb4b957cd04353afd9096fa871c1e469656c8c",
+   "count": 1,
+   "reason": "markdown boundary inputs on reserved example domains (RFC 2606)"
+  },
+  {
+   "file": "test/unit/p17-markdown.test.mjs",
+   "kind": "an email address",
+   "sha256": "1c3ed2d340aecabb04646f78e49692b8dc9f0057057b53515e2a401c361c48ae",
+   "count": 2,
+   "reason": "markdown autolink inputs on the reserved .invalid domain (RFC 2606)"
+  },
+  {
+   "file": "test/unit/v2-cloudflare-transport.test.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "1ba599f5b1152dd094c334a94383b007a4f4e4ab4fe7fd6e82a5e0c6334fda2b",
+   "count": 2,
+   "reason": "synthetic transport credentials and a reserved-domain URL with user information that the transport must refuse"
+  },
+  {
+   "file": "test/unit/v2-cloudflare-transport.test.mjs",
+   "kind": "an email address",
+   "sha256": "18717f7f1f60f92207bd02972c16aec92f52b31c2a8442444df988d8e8503c5e",
+   "count": 1,
+   "reason": "synthetic transport credentials and a reserved-domain URL with user information that the transport must refuse"
+  },
+  {
+   "file": "test/unit/v2-cloudflare-transport.test.mjs",
+   "kind": "an email address",
+   "sha256": "c21f40c6ad117f3544a6f0ea83a72c8aeebe1faec729c46b27c304e69161c625",
+   "count": 1,
+   "reason": "synthetic transport credentials and a reserved-domain URL with user information that the transport must refuse"
+  },
+  {
+   "file": "test/unit/v2-worker.test.mjs",
+   "kind": "an email address",
+   "sha256": "18717f7f1f60f92207bd02972c16aec92f52b31c2a8442444df988d8e8503c5e",
+   "count": 2,
+   "reason": "a reserved-domain reviewer email in worker access-claim tests"
+  },
+  {
+   "file": "test/v2/worker-bindings.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "aa1c8bf86efee800498e1f70a0b6b1a44f2089a126d2e0772b5b551b84f6292c",
+   "count": 1,
+   "reason": "synthetic service-token credentials for the worker bindings fake"
+  },
+  {
+   "file": "test/iac-cases.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "1881b15fde2ed918ef8f1f3005a5799820980af8fd24ba6cc758423f2c2c1836",
+   "count": 1,
+   "reason": "planted Terraform text of the V2.1 Access case A5 (an attribute named client_secret set from a variable reference): it is the HCL the IaC gate must refuse, and holds no value. The case came from main (V2.1) and met this gate first on the AP.8 integration branch"
+  },
+  {
+   "file": "test/unit/v21-absence.test.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "ffb2eb5b75bd9f44e8499c2ee3cd97dadded7e16bf1a968c9f6305c47274e01c",
+   "count": 1,
+   "reason": "the V2.1 Cloudflare tests' placeholder token, the literal text fake-token-for-loopback-tests-only: it is not a credential, and those tests refuse any non-loopback request. The file came from main (V2.1) and met this gate first on the AP.8 integration branch"
+  },
+  {
+   "file": "test/unit/v21-d1-schema.test.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "3f6d05f65b187d4fe6f8ba1be320c6aebfd5c014ad1889a6e761e2ec56f009ec",
+   "count": 1,
+   "reason": "the V2.1 Cloudflare tests' placeholder token, the literal text fake-token-for-loopback-tests-only: it is not a credential, and those tests refuse any non-loopback request. The file came from main (V2.1) and met this gate first on the AP.8 integration branch"
+  },
+  {
+   "file": "test/unit/v21-preflight.test.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "3f6d05f65b187d4fe6f8ba1be320c6aebfd5c014ad1889a6e761e2ec56f009ec",
+   "count": 1,
+   "reason": "the V2.1 Cloudflare tests' placeholder token, the literal text fake-token-for-loopback-tests-only: it is not a credential, and those tests refuse any non-loopback request. The file came from main (V2.1) and met this gate first on the AP.8 integration branch"
+  },
+  {
+   "file": "test/unit/v21-token-verify.test.mjs",
+   "kind": "a secret assigned a value",
+   "sha256": "3f6d05f65b187d4fe6f8ba1be320c6aebfd5c014ad1889a6e761e2ec56f009ec",
+   "count": 1,
+   "reason": "the V2.1 Cloudflare tests' placeholder token, the literal text fake-token-for-loopback-tests-only: it is not a credential, and those tests refuse any non-loopback request. The file came from main (V2.1) and met this gate first on the AP.8 integration branch"
+  }
+ ]
+}

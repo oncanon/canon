@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects. The docs moved from /docs/ to the root of
+# oncanon.com on 2026-11-18; old links keep working with a permanent redirect.
+/docs        /         301
+/docs/       /         301
+/docs/*      /:splat   301

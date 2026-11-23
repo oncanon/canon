@@ -1,0 +1,49 @@
+{
+  "schema": "deploy-token-scopes/v1",
+  "description": "The one scope list for the PUBLIC target deploy token (rp-public-deploy-<run>): a separate token from the private deploy token (rp-deploy-<run>), account-owned, this account only, 1-day expiry, used only by the maintainer at terraform/tofu apply time for infra/cloudflare/terraform-public. Publishing never uses it: the publisher signs its admin requests with its own key (V2.1 slice 04). The public module has no Access, so this token carries no Access scope. Every document that lists these scopes must agree with this file; test/unit/pv-deploy-token-scopes.test.mjs enforces it.",
+  "sufficiencyForApply": "NOT_EXECUTED: whether these scopes together suffice for `apply` is shown only by the first authorized apply. 'verified' says only that a scope's documented description covers its resource.",
+  "granted": [
+    {
+      "permission": "Workers Scripts Edit",
+      "neededFor": "cloudflare_workers_script.public_publisher (the public Worker) and cloudflare_workers_script_subdomain.public_publisher (its workers.dev route)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to Cloudflare Workers scripts.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "Workers R2 Storage Edit",
+      "neededFor": "cloudflare_r2_bucket.public_packets (Terraform creates the public bucket)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to Cloudflare R2 Storage.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "D1 Edit",
+      "neededFor": "cloudflare_d1_database.public_aliases, and the schema over the D1 query API (scripts/d1-schema.mjs against the public database); held for the token's whole 1-day life",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to D1.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "Account Settings Read",
+      "neededFor": "account discovery by the provider for the public module (unverified here as for the private token: drop it if the public apply succeeds without it)",
+      "source": "docs/v2/research/cloudflare-adapter.md §3.7 [S34] (Workers Builds default token; workers-sdk issue #9129); https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants read access to Account resources, account membership, and account level features.\"",
+      "necessity": "unverified; drop if apply succeeds without it"
+    }
+  ],
+  "notGranted": [
+    {
+      "permission": "Access: Apps and Policies Edit",
+      "reason": "the public target has no Access application or policy (mode (c): no Access anywhere)"
+    },
+    {
+      "permission": "Access: Service Tokens Edit",
+      "reason": "the public target has no Access service token; its publisher signs requests with its own key"
+    },
+    {
+      "permission": "Zone · Workers Routes Edit",
+      "reason": "no zone and no route: workers.dev only"
+    },
+    {
+      "permission": "User Details Read / Memberships Read",
+      "reason": "an account-owned token needs no user permissions"
+    }
+  ]
+}

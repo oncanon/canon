@@ -1,0 +1,13 @@
+JetBrainsMono-400.woff2 / JetBrainsMono-700.woff2: JetBrains Mono 2.304,
+subset from the official release static TTFs (JetBrainsMono-Regular.ttf and
+JetBrainsMono-Bold.ttf in JetBrainsMono-2.304.zip,
+https://github.com/JetBrains/JetBrainsMono/releases/tag/v2.304,
+sha256 6f6376c6ed2960ea8a963cd7387ec9d76e3f629125bc33d1fdcd7eb7012f7bbf).
+
+Coverage: Google Fonts' "latin" subset codepoints (what this folder held
+before) plus the whole Arrows block U+2190-21FF, so the → in the docs
+renders in this font instead of a local fallback. Layout features kept:
+calt, ccmp, frac, locl, kern, mark, mkmk.
+
+Made with fonttools (pyftsubset --flavor=woff2 --unicodes=... ).
+Licence: SIL OFL 1.1 (LICENSE-jetbrains-mono.txt).

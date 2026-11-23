@@ -1,0 +1,103 @@
+/* Docs article styles, shared by the Astro-written pages (DocsLayout:
+   .doc__head + .doc__body) and the Canon-rendered ones (CanonDocLayout:
+   .canon-doc wraps Canon's sealed doc/v1 fragment, whose own classes are
+   doc-header, doc-eyebrow, doc-description, figure.code, doc-next). The
+   fragment is never edited, so every difference is absorbed here. */
+.doc__head, .canon-doc > .doc-header { padding-block: 2.5rem 1.5rem; max-width: 56rem; }
+.doc__eyebrow, .canon-doc .doc-eyebrow {
+  font-family: var(--font-code);
+  font-size: 0.8125rem;
+  color: var(--accent-ink);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.doc__title, .canon-doc .doc-header h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.875rem, 3.5vw, 2.5rem);
+}
+.doc__lede, .canon-doc .doc-description {
+  margin-top: 1rem;
+  font-size: 1.0625rem;
+  color: var(--muted);
+  max-width: 60ch;
+}
+.doc__body {
+  padding-block: 1rem 4rem;
+  max-width: var(--prose-measure);
+}
+:is(.doc__body, .canon-doc) h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 0.9rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line-subtle);
+}
+.doc__body h2:first-child,
+.canon-doc > .doc-header + section > h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+:is(.doc__body, .canon-doc) h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+}
+:is(.doc__body, .canon-doc) p { margin-block: 0.9rem; }
+:is(.doc__body, .canon-doc) :is(ul, ol) { margin-block: 0.9rem; padding-left: 1.4rem; }
+:is(.doc__body, .canon-doc) li { margin-block: 0.35rem; }
+:is(.doc__body, .canon-doc) a { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-border); }
+:is(.doc__body, .canon-doc) code:not(pre code) {
+  background: var(--code-inline-bg);
+  color: var(--code-inline-ink);
+  border: 1px solid var(--code-inline-border);
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.8em;
+}
+:is(.doc__body, .canon-doc) pre {
+  background: var(--code-canvas);
+  border: 1px solid var(--code-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-block: 1.25rem;
+}
+:is(.doc__body, .canon-doc) pre code {
+  color: var(--code-ink);
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+}
+:is(.doc__body, .canon-doc) blockquote {
+  border-left: 3px solid var(--accent-border);
+  padding-left: 1rem;
+  color: var(--muted);
+  margin-block: 1.25rem;
+}
+:is(.doc__body, .canon-doc) table { width: 100%; border-collapse: collapse; margin-block: 1.25rem; font-size: 0.9rem; }
+:is(.doc__body, .canon-doc) th { text-align: left; border-bottom: 1px solid var(--line); padding: 0.5rem; color: var(--muted); }
+:is(.doc__body, .canon-doc) td { border-bottom: 1px solid var(--line-subtle); padding: 0.5rem; }
+.doc__tbd {
+  display: inline-block;
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--open-ink);
+  background: var(--open-bg);
+  border: 1px dashed var(--open-bd);
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.4rem;
+}
+
+/* Canon fragment: one container holds the header and the body, so the
+   spacing DocsLayout gets from two containers (each a centred box: the
+   head 56rem, the body the prose measure) is restored on its children. */
+.canon-doc { padding-block: 0 4rem; }
+.canon-doc > * { max-width: var(--prose-measure); margin-inline: auto; }
+.canon-doc > .doc-header { max-width: 56rem; }
+.canon-doc > .doc-header + * { padding-top: 1rem; }
+.canon-doc .doc-eyebrow { margin: 0 0 0.5rem; }
+.canon-doc .doc-description { margin: 1rem 0 0; }
+/* Canon marks code tokens (t-attr, t-com, t-str, t-prop, t-kw); the site
+   doesn't colour code yet, so they keep the block's ink. */
+.canon-doc .code [class^="t-"] { color: inherit; }

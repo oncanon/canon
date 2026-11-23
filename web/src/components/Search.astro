@@ -1,0 +1,626 @@
+---
+// Docs search: a combobox over Pagefind's JS API (pagefind.js, built into
+// dist/pagefind/ by `npx pagefind --site dist`). It replaces Pagefind's
+// default UI. No plate designs search; the panel is built from page05's own
+// tokens and is recorded in p5-fidelity.md under "Search (no plate; designed
+// from page05 tokens)".
+//
+// Everything it loads comes from this host: pagefind.js, its wasm and the
+// index shards under ${BASE}pagefind/.
+import { BASE } from "../lib/base";
+---
+<div class="search" data-search data-base={BASE}>
+  <input
+    id="search-input"
+    class="search__input"
+    type="search"
+    placeholder="Search docs   /"
+    aria-label="Search docs"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-expanded="false"
+    aria-controls="search-list"
+    aria-keyshortcuts="/"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    enterkeyhint="go"
+  />
+  <div id="search-panel" class="search__panel" hidden>
+    <p class="search__status" aria-live="polite"></p>
+    <div class="search__scroll" tabindex="-1">
+      <div id="search-list" class="search__list" role="listbox" aria-label="Search results"></div>
+      <div class="search__empty" hidden></div>
+      <button type="button" class="search__more" hidden></button>
+    </div>
+    <p class="search__hint" aria-hidden="true">
+      <kbd>↑</kbd><kbd>↓</kbd> to move <span class="search__dot">·</span>
+      <kbd>↵</kbd> to open <span class="search__dot">·</span>
+      <kbd>esc</kbd> to close
+    </p>
+  </div>
+</div>
+
+<script>
+  // Pages per batch, and section rows shown under each page.
+  const PAGE_BATCH = 8;
+  const SUBS_PER_PAGE = 3;
+  const DEBOUNCE_MS = 120;
+
+  type SubResult = { title: string; url: string; excerpt: string; locations?: number[] };
+  type PageData = {
+    url: string;
+    excerpt: string;
+    meta: { title?: string };
+    sub_results?: SubResult[];
+  };
+  type Hit = { id: string; data: () => Promise<PageData> };
+  type Pagefind = {
+    options: (o: Record<string, unknown>) => Promise<void>;
+    init?: () => Promise<void>;
+    search: (q: string) => Promise<{ results: Hit[] }>;
+  };
+
+  const root = document.querySelector<HTMLElement>("[data-search]");
+  if (root) setup(root);
+
+  function setup(root: HTMLElement) {
+    const base = root.dataset.base ?? "/";
+    const input = root.querySelector<HTMLInputElement>(".search__input")!;
+    const panel = root.querySelector<HTMLElement>(".search__panel")!;
+    const status = root.querySelector<HTMLElement>(".search__status")!;
+    const list = root.querySelector<HTMLElement>(".search__list")!;
+    const empty = root.querySelector<HTMLElement>(".search__empty")!;
+    const more = root.querySelector<HTMLButtonElement>(".search__more")!;
+
+    let loading: Promise<Pagefind> | null = null;
+    let seq = 0; // bumps on every new query; stale async work checks it and stops
+    let hits: Hit[] = [];
+    let shown = 0;
+    let options: HTMLAnchorElement[] = [];
+    let active = -1;
+    let timer: number | undefined;
+    let returnFocus: Element | null = null;
+
+    function load(): Promise<Pagefind> {
+      loading ??= import(/* @vite-ignore */ `${base}pagefind/pagefind.js`).then(async (pf: Pagefind) => {
+        await pf.options({ baseUrl: base, excerptLength: 24 });
+        await pf.init?.();
+        return pf;
+      });
+      return loading;
+    }
+
+    // ---- open / close ----------------------------------------------------
+    const isOpen = () => !panel.hidden;
+    function open() {
+      panel.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+    }
+    function close() {
+      panel.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      setActive(-1);
+    }
+
+    // ---- active row ------------------------------------------------------
+    function setActive(i: number, scroll = true) {
+      if (active >= 0 && options[active]) options[active].setAttribute("aria-selected", "false");
+      active = i;
+      const el = options[i];
+      if (!el) {
+        input.removeAttribute("aria-activedescendant");
+        return;
+      }
+      el.setAttribute("aria-selected", "true");
+      input.setAttribute("aria-activedescendant", el.id);
+      if (scroll) el.scrollIntoView({ block: "nearest" });
+    }
+
+    // ↓ past the last row loads the next batch if there is one, then wraps.
+    async function move(step: 1 | -1) {
+      if (!options.length) return;
+      if (step === 1 && active === options.length - 1 && shown < hits.length) {
+        const first = options.length;
+        await showMore();
+        setActive(first);
+        return;
+      }
+      const n = options.length;
+      setActive(active === -1 ? (step === 1 ? 0 : n - 1) : (active + step + n) % n);
+    }
+
+    function go(el: HTMLAnchorElement, newTab = false) {
+      if (newTab) {
+        window.open(el.href, "_blank", "noopener");
+        return;
+      }
+      close();
+      input.blur();
+      window.location.assign(el.href);
+    }
+
+    // ---- rendering -------------------------------------------------------
+    // Pagefind wraps hits in <mark>; everything else in an excerpt is page
+    // text. Build nodes instead of using innerHTML so text such as
+    // "<report.json>" stays text.
+    //
+    // A section's text starts with its own heading, which the row already
+    // shows, so a leading copy of `drop` (and the "." Pagefind adds after a
+    // heading) is cut.
+    function excerptNode(raw: string, drop?: string): HTMLElement {
+      const pieces: { text: string; marked: boolean }[] = [];
+      let marked = false;
+      for (const part of raw.split(/(<mark>|<\/mark>)/)) {
+        if (part === "<mark>") { marked = true; continue; }
+        if (part === "</mark>") { marked = false; continue; }
+        if (part) pieces.push({ text: decodeEntities(part), marked });
+      }
+      const plain = pieces.map((p) => p.text).join("");
+      if (drop && plain.startsWith(drop)) {
+        let cut = drop.length + (plain.slice(drop.length).match(/^[.:]?\s*/)?.[0].length ?? 0);
+        while (cut > 0 && pieces.length) {
+          const first = pieces[0];
+          if (first.text.length <= cut) { cut -= first.text.length; pieces.shift(); }
+          else { first.text = first.text.slice(cut); cut = 0; }
+        }
+      }
+      const out = document.createElement("span");
+      out.className = "sr__excerpt";
+      for (const { text, marked } of pieces) {
+        if (marked) {
+          const m = document.createElement("mark");
+          m.textContent = text;
+          out.append(m);
+        } else out.append(document.createTextNode(text));
+      }
+      return out;
+    }
+    function decodeEntities(s: string): string {
+      return s.replace(/&(lt|gt|amp|quot|#39|#x27|apos);/g, (_, e) =>
+        ({ lt: "<", gt: ">", amp: "&", quot: '"', "#39": "'", "#x27": "'", apos: "'" })[e as string] ?? _,
+      );
+    }
+    function span(cls: string, text: string) {
+      const s = document.createElement("span");
+      s.className = cls;
+      s.textContent = text;
+      return s;
+    }
+    function option(href: string, cls: string): HTMLAnchorElement {
+      const a = document.createElement("a");
+      a.href = href;
+      a.className = `sr ${cls}`;
+      a.id = `sr-${options.length}`;
+      a.tabIndex = -1;
+      a.setAttribute("role", "option");
+      a.setAttribute("aria-selected", "false");
+      options.push(a);
+      return a;
+    }
+
+    function group(d: PageData): HTMLElement {
+      const subs = d.sub_results ?? [];
+      // A sub-result without an anchor is the text before the page's first
+      // heading; its excerpt belongs on the page row.
+      const top = subs.find((s) => !s.url.includes("#"));
+      const sections = subs
+        .filter((s) => s.url.includes("#"))
+        .map((s, i) => ({ s, i, w: s.locations?.length ?? 0 }))
+        .sort((a, b) => b.w - a.w)
+        .slice(0, SUBS_PER_PAGE)
+        .sort((a, b) => a.i - b.i)
+        .map(({ s }) => s);
+
+      const g = document.createElement("div");
+      g.className = "sr-group";
+      g.setAttribute("role", "group");
+
+      const page = option(d.url, "sr--page");
+      const title = span("sr__title", d.meta.title ?? d.url);
+      title.id = `${page.id}-t`;
+      g.setAttribute("aria-labelledby", title.id);
+      page.append(title, span("sr__path", decodeURI(d.url)));
+      const pageExcerpt = top?.excerpt ?? (sections.length ? "" : d.excerpt);
+      if (pageExcerpt) page.append(excerptNode(pageExcerpt, d.meta.title));
+      g.append(page);
+
+      for (const s of sections) {
+        const row = option(s.url, "sr--sub");
+        const h = document.createElement("span");
+        h.className = "sr__heading";
+        h.append(span("sr__hash", "#"), document.createTextNode(s.title));
+        row.append(h);
+        if (s.excerpt) row.append(excerptNode(s.excerpt, s.title));
+        g.append(row);
+      }
+      return g;
+    }
+
+    async function showMore() {
+      const mine = seq;
+      const batch = hits.slice(shown, shown + PAGE_BATCH);
+      const data = await Promise.all(batch.map((h) => h.data()));
+      if (mine !== seq) return;
+      for (const d of data) list.append(group(d));
+      shown += batch.length;
+      const left = hits.length - shown;
+      more.hidden = left <= 0;
+      more.textContent = `Show ${Math.min(left, PAGE_BATCH)} more ${left === 1 ? "page" : "pages"}`;
+    }
+
+    function reset() {
+      list.replaceChildren();
+      options = [];
+      active = -1;
+      shown = 0;
+      input.removeAttribute("aria-activedescendant");
+    }
+
+    async function run(q: string) {
+      const mine = ++seq;
+      const query = q.trim();
+      if (!query) {
+        hits = [];
+        reset();
+        close();
+        return;
+      }
+      if (!loading) {
+        status.textContent = "Searching…";
+        open();
+      }
+      const pf = await load();
+      const res = await pf.search(query);
+      if (mine !== seq) return;
+      hits = res.results;
+      reset();
+      const n = hits.length;
+      status.textContent = n
+        ? `${n} ${n === 1 ? "page" : "pages"} for “${query}”`
+        : "No matches";
+      empty.hidden = n > 0;
+      if (!n) {
+        empty.replaceChildren(
+          span("search__empty-title", `No results for “${query}”`),
+          span("search__empty-hint", "Try a command such as verify or alias, or a schema such as report/v1."),
+        );
+        more.hidden = true;
+      }
+      await showMore();
+      if (mine !== seq) return;
+      open();
+    }
+
+    // ---- events ----------------------------------------------------------
+    input.addEventListener("input", () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => run(input.value), DEBOUNCE_MS);
+    });
+    // Warm the index on first focus so the first keystroke isn't waiting on wasm.
+    input.addEventListener("focus", () => {
+      load();
+      if (input.value.trim() && hits.length + (empty.hidden ? 0 : 1) > 0) open();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowDown":
+        case "ArrowUp":
+          e.preventDefault();
+          if (!isOpen()) {
+            if (input.value.trim()) open();
+            return;
+          }
+          move(e.key === "ArrowDown" ? 1 : -1);
+          return;
+        case "Enter": {
+          if (!isOpen() || !options.length) return;
+          e.preventDefault();
+          go(options[active >= 0 ? active : 0], e.metaKey || e.ctrlKey);
+          return;
+        }
+        case "Escape":
+          e.preventDefault();
+          if (isOpen()) close();
+          else if (input.value) {
+            input.value = "";
+            run("");
+          } else {
+            input.blur();
+            if (returnFocus instanceof HTMLElement) returnFocus.focus();
+            returnFocus = null;
+          }
+          return;
+      }
+    });
+
+    more.addEventListener("click", async () => {
+      const first = options.length;
+      await showMore();
+      input.focus();
+      setActive(first);
+    });
+    more.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        input.focus();
+      }
+    });
+
+    list.addEventListener("mousemove", (e) => {
+      const el = (e.target as Element).closest<HTMLAnchorElement>(".sr");
+      const i = el ? options.indexOf(el) : -1;
+      if (i >= 0 && i !== active) setActive(i, false);
+    });
+    list.addEventListener("click", (e) => {
+      const el = (e.target as Element).closest<HTMLAnchorElement>(".sr");
+      if (el && !(e.metaKey || e.ctrlKey || e.shiftKey)) close();
+    });
+
+    // Close when focus or a click leaves the search box; keep the query.
+    root.addEventListener("focusout", (e) => {
+      const next = e.relatedTarget as Node | null;
+      if (!next || !root.contains(next)) close();
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (isOpen() && !root.contains(e.target as Node)) close();
+    });
+
+    // "/" anywhere outside a text field focuses search.
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      returnFocus = document.activeElement;
+      input.focus();
+      input.select();
+    });
+  }
+</script>
+
+<style>
+  .search {
+    /* page05: input 220 x 36. */
+    width: 220px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .search__input {
+    /* page05 nav input. */
+    appearance: none;
+    width: 100%;
+    height: 36px;
+    border: 1px solid #293548;
+    border-radius: 6.4px;
+    background: #111827;
+    padding: 0 12px;
+    font: inherit;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: #f1f5f9;
+  }
+  .search__input::placeholder { color: #9ca3af; opacity: 1; }
+  .search__input::-webkit-search-cancel-button { appearance: none; }
+  .search__input:focus { outline: none; border-color: #60a5fa; }
+  .search__input:focus-visible { box-shadow: 0 0 0 1px #60a5fa; }
+
+  /* ---- Panel ------------------------------------------------------------
+     Follows the page's colour scheme (the nav bar itself is always dark).
+     The nav overrides --ink and --paper for its own chrome, so the panel
+     names its ink directly: the token values of --ink, light and dark. */
+  .search__panel {
+    --sr-ink: #0f172a;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    width: 480px;
+    max-width: calc(100vw - 40px);
+    max-height: min(70vh, 560px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    /* page05 plate card shadow. */
+    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.22);
+    font-family: var(--font-body);
+    line-height: normal;
+    text-align: left;
+  }
+  .search__panel[hidden] { display: none; }
+
+  .search__status {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line-subtle);
+  }
+  .search__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6px;
+  }
+
+  /* ---- Rows: :global because they are built at runtime ------------------ */
+  .search__list :global(.sr-group + .sr-group) {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--line-subtle);
+  }
+  .search__list :global(.sr) {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 3.5px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .search__list :global(.sr--page) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: baseline;
+  }
+  .search__list :global(.sr__title) {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.25;
+    color: var(--sr-ink);
+  }
+  .search__list :global(.sr__path) {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .search__list :global(.sr__excerpt) {
+    grid-column: 1 / -1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  .search__list :global(.sr--sub) {
+    position: relative;
+    margin-left: 10px;
+    padding-left: 14px;
+  }
+  /* A 1px hairline ties section rows to their page. */
+  .search__list :global(.sr--sub::before) {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--line);
+  }
+  .search__list :global(.sr__heading) {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-secondary);
+  }
+  .search__list :global(.sr__hash) {
+    margin-right: 5px;
+    font-family: var(--font-code);
+    font-weight: 400;
+    color: var(--muted);
+  }
+  /* Matched terms: ink weight, no marker colour. */
+  .search__list :global(mark) {
+    background: none;
+    color: var(--sr-ink);
+    font-weight: 600;
+  }
+  /* Active row: the palette's selected style (accent wash + accent bar). */
+  .search__list :global(.sr[aria-selected="true"]) {
+    background: var(--accent-wash);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .search__list :global(.sr--sub[aria-selected="true"]::before) { display: none; }
+  .search__list :global(.sr[aria-selected="true"] .sr__title),
+  .search__list :global(.sr[aria-selected="true"] .sr__heading) { color: var(--accent-ink); }
+
+  .search__more {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border: 0;
+    border-top: 1px solid var(--line-subtle);
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--accent-ink);
+    cursor: pointer;
+  }
+  .search__more:hover,
+  .search__more:focus-visible { background: var(--surface-subtle); outline: none; }
+  .search__more[hidden], .search__empty[hidden] { display: none; }
+
+  .search__empty { padding: 14px 10px 16px; }
+  .search__empty :global(.search__empty-title) {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sr-ink);
+  }
+  .search__empty :global(.search__empty-hint) {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .search__hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--line-subtle);
+    background: var(--surface-subtle);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .search__dot { margin-inline: 4px; }
+  .search__hint kbd {
+    min-width: 18px;
+    padding: 0 4px;
+    border: 1px solid var(--line);
+    border-radius: 3.5px;
+    background: var(--card);
+    font-family: var(--font-code);
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    color: var(--ink-secondary);
+  }
+  /* Touch screens have no arrow keys; the hint would be noise there. */
+  @media (hover: none) and (pointer: coarse) {
+    .search__hint { display: none; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .search__panel {
+      --sr-ink: #f1f5f9;
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  /* Phone: the nav wraps onto several rows, so the panel spans the bar's
+     full width under it. The sticky .nav is its containing block. */
+  @media (max-width: 600px) {
+    .search { position: static; }
+    /* Path under the title rather than squeezed beside it. */
+    .search__list :global(.sr--page) { grid-template-columns: minmax(0, 1fr); }
+    .search__list :global(.sr__path) { margin-top: 2px; white-space: normal; overflow-wrap: anywhere; }
+    .search__panel {
+      top: calc(100% + 6px);
+      left: 8px;
+      right: 8px;
+      width: auto;
+      max-width: none;
+    }
+  }
+</style>

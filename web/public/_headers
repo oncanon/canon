@@ -1,0 +1,11 @@
+# Cloudflare Pages headers. The agent-facing text files carry UTF-8 (em dashes,
+# arrows); say so, so no client guesses Latin-1.
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+# Sparkle update feed for Canon.app (SUFeedURL). The release workflow adds
+# items; a short cache lets a new release reach clients within five minutes.
+/appcast.xml
+  Content-Type: application/rss+xml; charset=utf-8
+  Cache-Control: public, max-age=300

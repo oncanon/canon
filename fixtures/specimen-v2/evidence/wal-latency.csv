@@ -1,0 +1,7 @@
+stage,mode,p50_ms,p95_ms,p99_ms,p999_ms,alloc_kib_per_op
+wal_append,legacy_copy,1.2,18.4,148.4,412.0,64.0
+wal_append,zero_copy_mmap,0.4,1.9,4.6,11.2,0.5
+segment_seal,legacy_copy,14.8,62.1,119.5,240.8,512.0
+segment_seal,zero_copy_mmap,2.1,6.4,11.8,19.4,4.0
+index_rebuild,legacy_copy,48.0,91.3,134.0,205.1,1024.0
+index_rebuild,zero_copy_mmap,9.5,16.2,22.4,31.0,16.0

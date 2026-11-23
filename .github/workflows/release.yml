@@ -1,0 +1,301 @@
+# Builds and publishes one release: the CLI tarball (Homebrew formula) and a notarized
+# Canon.app (Homebrew cask + Sparkle appcast). See docs/operations/release.md.
+#
+# Normal path: release-please.yml calls this when a release PR is merged; the GitHub Release
+# for the tag exists as a draft. Manual path: Actions -> release -> Run workflow from main,
+# with an existing tag. dry_run (default on) builds, signs and notarizes, keeps the files as
+# workflow artifacts, and publishes nothing.
+#
+# If any step before "publish" fails (tests, signing, notarization, Gatekeeper check), the
+# release stays a draft, nothing is uploaded, and neither the tap nor the appcast changes.
+# "publish" checks every write before it makes the first one.
+name: release
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      dry_run:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag, for example v0.2.0
+        type: string
+        required: true
+      dry_run:
+        description: Build, sign and notarize only; publish nothing
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ inputs.tag }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - id: version
+        name: Tag and package.json agree
+        run: |
+          [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]] || { echo "::error::tag is not vX.Y.Z: $TAG"; exit 1; }
+          version="${BASH_REMATCH[1]}"
+          package_version="$(node -p 'require("./package.json").version')"
+          [ "$version" = "$package_version" ] || { echo "::error::tag $TAG but package.json has $package_version"; exit 1; }
+          [ -f web/public/appcast.xml ] || { echo "::error::web/public/appcast.xml is missing at $TAG"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: check
+    runs-on: macos-15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  cli:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Pack the CLI
+        run: |
+          mkdir -p out
+          npm pack --pack-destination out
+          test -f "out/canon-$VERSION.tgz"
+      - name: The packed CLI installs and reports its version
+        run: |
+          prefix="$RUNNER_TEMP/prefix"
+          npm install --global --prefix "$prefix" "out/canon-$VERSION.tgz"
+          [ "$("$prefix/bin/canon" --version)" = "$VERSION" ]
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cli
+          path: out/canon-${{ needs.check.outputs.version }}.tgz
+          if-no-files-found: error
+
+  app:
+    needs: [check, test]
+    runs-on: macos-15
+    # Signing secrets live in the "release" environment, which only main may use.
+    environment: release
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+
+      - name: Fetch the pinned Sparkle release
+        run: |
+          sparkle_dir="$(./macos/CanonBar/fetch-sparkle.sh "$RUNNER_TEMP/sparkle")"
+          [ -x "$sparkle_dir/bin/sign_update" ] || { echo "::error::fetch-sparkle.sh gave no sign_update"; exit 1; }
+          echo "SPARKLE_DIR=$sparkle_dir" >> "$GITHUB_ENV"
+
+      - name: Load the Developer ID certificate into a temporary keychain
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          umask 077
+          keychain="$RUNNER_TEMP/release.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          printf '%s' "$DEVELOPER_ID_P12" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$keychain" -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
+          rm -f "$RUNNER_TEMP/developer-id.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain" > /dev/null
+          existing=()
+          while IFS= read -r line; do line="${line//\"/}"; existing+=("${line#"${line%%[![:space:]]*}"}"); done < <(security list-keychains -d user)
+          security list-keychains -d user -s "$keychain" "${existing[@]}"
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)"
+          [ -n "$identity" ] || { echo "::error::no Developer ID Application identity in DEVELOPER_ID_P12"; exit 1; }
+          echo "CANON_SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+          echo "RELEASE_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+
+      - name: Write the App Store Connect key for notarization
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          umask 077
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc-key.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc-key.p8" >> "$GITHUB_ENV"
+
+      - name: Build and sign Canon.app (universal, hardened runtime)
+        env:
+          SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
+          # Same folder as the fetch step, so the app embeds the Sparkle whose sign_update signs it.
+          CANON_SPARKLE_DIR: ${{ runner.temp }}/sparkle
+        run: |
+          [ -n "$SPARKLE_PUBLIC_KEY" ] || { echo "::error::repository variable SPARKLE_PUBLIC_KEY is not set"; exit 1; }
+          ./macos/CanonBar/build-app.sh --release "$RUNNER_TEMP/out/Canon.app"
+
+      - name: Notarize, staple, zip and check with Gatekeeper
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: ./macos/CanonBar/package-release.sh "$RUNNER_TEMP/out/Canon.app" "$RUNNER_TEMP/out/Canon-$VERSION.zip"
+
+      - name: Sign the zip for Sparkle
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          zip="$RUNNER_TEMP/out/Canon-$VERSION.zip"
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$SPARKLE_DIR/bin/sign_update" --ed-key-file - "$zip" > "$RUNNER_TEMP/out/sparkle-signature.txt"
+          signature="$(sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p' "$RUNNER_TEMP/out/sparkle-signature.txt")"
+          [ -n "$signature" ] || { echo "::error::sign_update printed no signature"; exit 1; }
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$SPARKLE_DIR/bin/sign_update" --verify "$zip" "$signature" --ed-key-file -
+
+      - name: Remove signing material
+        if: always()
+        run: |
+          [ -n "${RELEASE_KEYCHAIN:-}" ] && security delete-keychain "$RELEASE_KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/asc-key.p8" "$RUNNER_TEMP/developer-id.p12"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: app
+          path: |
+            ${{ runner.temp }}/out/Canon-${{ needs.check.outputs.version }}.zip
+            ${{ runner.temp }}/out/sparkle-signature.txt
+          if-no-files-found: error
+
+  publish:
+    needs: [check, cli, app]
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      # The release scripts come from the tag, so main's later edits cannot change a release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          path: src
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: canon
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: oncanon/homebrew-tap
+          token: ${{ secrets.TAP_TOKEN }}
+          path: tap
+
+      - name: Check every write before making one
+        run: |
+          # Values go to later steps through GITHUB_ENV, which this step cannot read itself.
+          formula_sha256="$(sha256sum "artifacts/canon-$VERSION.tgz" | cut -d' ' -f1)"
+          cask_sha256="$(sha256sum "artifacts/Canon-$VERSION.zip" | cut -d' ' -f1)"
+          zip_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/Canon-$VERSION.zip"
+          {
+            echo "FORMULA_SHA256=$formula_sha256"
+            echo "CASK_SHA256=$cask_sha256"
+            echo "ZIP_URL=$zip_url"
+          } >> "$GITHUB_ENV"
+          # A file already on the Release must be byte-identical to this run's file. A rebuilt,
+          # re-notarized zip differs, and replacing it would break the Sparkle signature in the
+          # live appcast, so that case stops here.
+          mkdir -p published
+          # Only a fully uploaded asset counts; a broken partial upload is replaced in the next step.
+          existing="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.state == "uploaded") | .name')"
+          for asset in "canon-$VERSION.tgz" "Canon-$VERSION.zip"; do
+            if grep -qxF "$asset" <<< "$existing"; then
+              gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir published
+              cmp "published/$asset" "artifacts/$asset" || { echo "::error::$asset is already on $TAG with different bytes"; exit 1; }
+            fi
+          done
+          [ -f canon/web/public/appcast.xml ] || { echo "::error::web/public/appcast.xml is missing on main"; exit 1; }
+          node src/scripts/release/appcast.mjs --check --file canon/web/public/appcast.xml --version "$VERSION" \
+            --url "$zip_url" --sign-update "$(cat artifacts/sparkle-signature.txt)"
+          node src/scripts/release/tap-bump.mjs --check --tap tap --version "$VERSION" \
+            --formula-sha256 "$formula_sha256" --cask-sha256 "$cask_sha256"
+          # GitHub refuses the push service to a token without write access, so this fails now
+          # rather than after the Release and the appcast are live.
+          git -C tap push --dry-run -q origin HEAD:main
+
+      - name: Attach the files and publish the GitHub Release
+        run: |
+          for asset in "canon-$VERSION.tgz" "Canon-$VERSION.zip"; do
+            # --clobber can only replace a partial upload: a fully uploaded asset was compared
+            # byte for byte in the check step and is in published/.
+            [ -f "published/$asset" ] || gh release upload "$TAG" "artifacts/$asset" --repo "$GITHUB_REPOSITORY" --clobber
+          done
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+
+      # The appcast goes before the tap: if this push fails, brew users are not moved to a
+      # version that Sparkle and livecheck cannot see. Re-running the job is safe.
+      - name: Add the release to the Sparkle appcast on main
+        run: |
+          signature="$(cat artifacts/sparkle-signature.txt)"
+          src/scripts/release/commit-and-push.sh canon main "chore(release): appcast v$VERSION" -- \
+            node "$GITHUB_WORKSPACE/src/scripts/release/appcast.mjs" --file web/public/appcast.xml \
+            --version "$VERSION" --url "$ZIP_URL" --sign-update "$signature"
+
+      - name: Point the Homebrew tap at this release
+        run: |
+          src/scripts/release/commit-and-push.sh tap main "feat: canon and canon-app $VERSION" -- \
+            node "$GITHUB_WORKSPACE/src/scripts/release/tap-bump.mjs" --tap . --version "$VERSION" \
+            --formula-sha256 "$FORMULA_SHA256" --cask-sha256 "$CASK_SHA256"
+
+  site:
+    needs: publish
+    permissions:
+      contents: read
+    uses: ./.github/workflows/site.yml
+    with:
+      ref: main
+    secrets: inherit

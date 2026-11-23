@@ -1,0 +1,11 @@
+{
+  "schema": "provider-lock/v1",
+  "description": "Provenance pin for infra/cloudflare/terraform/.terraform.lock.hcl (V2.1 slice 06). The lockfile is the one `tofu init` wrote in the live fire (2026-09-28); its SHA-256 equals the live fire's own record (the maintainer's evidence, init-validate/lockfile.sha256). test/unit/v21-lockfile.test.mjs requires the committed lockfile to match this pin, so any hash drift fails. A new provider version is a reviewed change to both files, never an automatic re-lock.",
+  "file": "infra/cloudflare/terraform/.terraform.lock.hcl",
+  "sha256": "1ef528602d86c4c997602be89a97d29dc3c58f79afdc66b01f2bcf30946c73bc",
+  "provider": "registry.opentofu.org/cloudflare/cloudflare",
+  "version": "5.26.0",
+  "constraints": "~> 5.0",
+  "hashCount": 17,
+  "source": "tofu init during the live fire, 2026-09-28; recorded by the operator as init-validate/lockfile.sha256 in the maintainer's live-fire evidence root"
+}

@@ -1,0 +1,5 @@
+[00:14:02.118] compact-worker-2: seal segment seg-000481 (67,108,864 bytes, 98,412 frames)
+[00:14:02.120] compact-worker-2: fdatasync(fd=19) completed in 1.84 ms
+[00:14:02.121] compact-worker-2: manifest CAS generation 418 -> 419 committed (crc32c=0x8fa2d109)
+[00:14:02.121] reader-epoch-guard: 4 pinned readers on seg-000479; deferring munmap until epoch >= 9104
+[00:14:02.126] reader-epoch-guard: epoch 9104 quiescent; unmapped seg-000479 cleanly (0 faults)

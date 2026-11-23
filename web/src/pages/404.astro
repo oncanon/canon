@@ -1,0 +1,70 @@
+---
+// 404. No design-v2 plate draws a 404 page, so it is page05's hero band
+// (design-v2 surfaces; the hero the maintainer chose for home on 2026-11-18): the dark
+// #1b2434 band, 14px #93c5fd eyebrow, Libron 700 title at the home hero's size
+// and page05's ratios, #e2e8f0 body, 44px buttons, with one short message.
+// scripts/fidelity-plates.mjs compares every one of those against page05.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { BASE } from "../lib/base";
+---
+<BaseLayout
+  title="Page not found"
+  description="This address isn't a page on oncanon.com; the links below lead back into the Canon docs."
+  kind="none"
+>
+  <div class="nf">
+    <section class="u-container nf__row">
+      <span class="nf__eyebrow">404 · not found</span>
+      <h1 class="nf__title">This page isn’t here.</h1>
+      <p class="nf__body">
+        Nothing is published at this address. The docs now live at the root of oncanon.com, so an old
+        link may point at a page that moved. Press <kbd>/</kbd> to search, or start from one of these.
+      </p>
+      <div class="nf__ctas">
+        <a class="nf__btn nf__btn--primary" href={`${BASE}guide/`}>Guide</a>
+        <a class="nf__btn nf__btn--ghost" href={`${BASE}cli/`}>CLI reference</a>
+        <a class="nf__btn nf__btn--ghost" href={BASE}>Home</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* This stylesheet ships with the 404 page only: let the band fill the
+     viewport so a short page doesn't end in bare paper under the footer. */
+  :global(body) { display: flex; flex-direction: column; min-height: 100svh; }
+  :global(main) { flex: 1; display: flex; flex-direction: column; }
+  .nf { flex: 1; background: #1b2434; color: #f1f5f9; border-bottom: 1px solid #293548; line-height: normal; }
+  .nf__row { padding-block: 72px 64px; display: flex; flex-direction: column; gap: 20px; }
+  .nf__eyebrow { font-size: 14px; font-weight: 600; color: #93c5fd; }
+  .nf__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--hero-title-size);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .nf__body { margin: 0; font-size: 1.1875rem; line-height: 1.6; color: #e2e8f0; max-width: 54ch; }
+  .nf__body kbd {
+    font-family: var(--font-code);
+    font-size: 0.8em;
+    border: 1px solid #475569;
+    border-radius: 3.5px;
+    padding: 0 0.35em;
+  }
+  .nf__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+  .nf__btn {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 6.4px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nf__btn--primary { background: #60a5fa; color: #0b0f17; }
+  .nf__btn--ghost { border: 1px solid #94a3b8; color: #f1f5f9; }
+  .nf__btn:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+</style>

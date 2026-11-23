@@ -1,0 +1,453 @@
+---
+// Home page. Source of truth: Identity & Surfaces page05 ("Canon docs v2.1 —
+// home and CLI reference"). Every length, colour and gap in <style> below is
+// copied from page05's inline CSS; comments name the element it came from.
+// The hero is page05's own (eyebrow, serif headline, paragraph, buttons):
+// The maintainer chose it over identity-v2's display-lockup hero on 2026-11-18.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GroupCard from "../components/GroupCard.astro";
+import SectionHead from "../components/SectionHead.astro";
+import ExitCodes from "../components/ExitCodes.astro";
+import routeRows from "../data/route-rows.json";
+import { BASE } from "../lib/base";
+import { slug } from "../lib/slug";
+
+const PITCH =
+  "Canon compiles structured JSON and bundled evidence into an immutable pair: a calm HTML publication for people and a byte-verified Markdown file for agents — fingerprinted, content-addressed, re-hashed on every read.";
+---
+<BaseLayout title="Sealed editions for agent work" fullTitle="Canon — sealed editions for agent work" description={PITCH} kind="home">
+  <div class="p05">
+    <div class="hero">
+      <section class="u-container hero__row">
+        <div class="hero__copy">
+          <span class="hero__eyebrow">Deterministic · offline-first · fail-closed</span>
+          <h1 class="hero__title">Sealed editions for agent work.</h1>
+          <p class="hero__pitch">{PITCH}</p>
+          <div class="hero__ctas" data-pagefind-ignore>
+            <a class="btn btn--primary" href={`${BASE}guide/quick-start/`}>Write your first Brief</a>
+            <a class="btn btn--ghost" href={`${BASE}cli/`}>CLI reference</a>
+          </div>
+        </div>
+        <div class="term" data-pagefind-ignore>
+          <div class="term__bar"><span>zsh</span><span>proposed output style</span></div>
+          <pre class="term__body"><span class="t-muted">$</span>{" canon brief report.json --alias alias-promotion\n\n"}<span class="t-muted">compiled</span>{"  report/v1 → packet/v1        14 files\n"}<span class="t-proven">verified</span>{"  sha256 · md parity · anchors 1:1\n"}<span class="t-muted">stored  </span>{"  "}<span class="t-id">sha256-f9b0c51d</span>{"634c76fe…   ~/.canon\n"}<span class="t-muted">alias   </span>{"  alias-promotion   g4 → g5\n"}<span class="t-muted">serving </span>{"  "}<span class="t-url">http://127.0.0.1:8791/a/alias-promotion/</span>{"\n\n"}<span class="t-muted">exit</span>{" "}<span class="t-proven">0</span></pre>
+        </div>
+      </section>
+    </div>
+
+    <section class="u-container sec sec--01">
+      <SectionHead num="01" title="One source, two leaves" id="one-source-two-leaves" />
+      <figure class="fig">
+        <div class="plate" data-pagefind-ignore>
+          <span class="plate__corner plate__corner--tl" aria-hidden="true"></span>
+          <span class="plate__corner plate__corner--tr" aria-hidden="true"></span>
+          <span class="plate__corner plate__corner--bl" aria-hidden="true"></span>
+          <span class="plate__corner plate__corner--br" aria-hidden="true"></span>
+          <div class="plate__row">
+            <div class="src">
+              <div class="src__head"><b>report.json</b><span>source</span></div>
+              <pre class="src__code">{"{\n  "}<span>"schema"</span>{": \"report/v1\",\n  "}<span>"blocks"</span>{": [ … ],\n  "}<span>"evidence"</span>{": [ … ]\n}"}</pre>
+              <div class="src__exts"><span>.csv</span><span>.json</span><span>.log</span><span>.diff</span></div>
+            </div>
+            <div class="arrow" aria-hidden="true">
+              <span>build</span>
+              <svg width="72" height="12" viewBox="0 0 72 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 H69 M64 1.5 L69 6 L64 10.5" /></svg>
+              <span>verify</span>
+            </div>
+            <div class="pair-wrap">
+              <div class="pair">
+                <div class="leaf leaf--human">
+                  <div class="leaf__head"><b>index.html</b><span>for people</span></div>
+                  <div class="leaf__heading"><span class="tag">02</span><span class="leaf__h">Proposed flow</span></div>
+                  <div class="leaf__block"><span class="tag">b‑03</span><span class="leaf__text">If the expected generation doesn’t match, the target refuses and the CLI exits <code>1</code>.</span></div>
+                  <div class="leaf__foot">Zero-JS · vendored fonts · print-ready</div>
+                </div>
+                <div class="leaf leaf--agent">
+                  <div class="leaf__head"><b>report.md</b><span>for agents</span></div>
+                  <div class="leaf__heading leaf__heading--md"><span><span class="leaf__hash">## </span>02 · Proposed flow</span></div>
+                  <div class="leaf__block"><span class="tag">b‑03</span><span class="leaf__text">If the expected generation doesn’t match, the target refuses and the CLI exits `1`.</span></div>
+                  <div class="leaf__foot">CommonMark · block anchors 1:1</div>
+                </div>
+              </div>
+              <span class="pair__dot" aria-hidden="true"></span>
+              <div class="pair__id"><span>sha256-f9b0c51d… · one ID for both leaves</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="fig__cap"><span><span class="fig__plate">Plate 1.</span> One sheet, folded once. Block <span class="u-mono">b‑03</span> is the same block on both leaves, and the content ID covers every byte of both.</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="u-container sec sec--02">
+      <SectionHead num="02" title="CLI surface" id="cli-surface"><ExitCodes /></SectionHead>
+      <GroupCard number="2.1" title="Author & inspect" anchor={slug("Author & inspect")} summary="Compile, verify, store, point an alias." icon="author"
+        lines={["canon brief <report.json> --alias <name>", "canon sitrep <site-input.json> --alias <name>", "canon status"]} />
+      <GroupCard number="2.2" title="Build, verify & archive" anchor={slug("Build, verify & archive")} summary="Low-level steps, each checkable alone." icon="build"
+        lines={["canon build · verify [--json]", "canon build-site · verify-site", "canon archive <packet-dir> --out <file.tar>"]} />
+      <GroupCard number="2.3" title="Store & aliases" anchor={slug("Store & aliases")} summary="Compare-and-swap prevents lost updates." icon="store"
+        lines={["canon publish <packet-dir> [--root <store>]", "canon alias list · get <name>", "canon alias set <name> <id> --expect-generation <n>"]} />
+      <GroupCard number="2.4" title="Workstation server" anchor={slug("Workstation server")} summary="Loopback by default; backs Canon.app." icon="serve"
+        lines={["canon serve --root <store> [--port 8791] [--tailscale …]", "canon service start · status · stop", "canon service restart · clean"]} />
+      <GroupCard number="2.5" title="Remote targets" anchor={slug("Remote targets")} summary="Gated: explicit grants, dry-run, zero delete." icon="remote" highlight
+        lines={["canon publish <dir> --target --targets [--grant upload]", "canon promote · rollback --expect-generation [--grant promote]", "canon reconcile --target --targets"]} />
+      <GroupCard number="2.6" title="Served routes" anchor={slug("Served routes")} summary="Mutable aliases → immutable editions." icon="routes" last
+        lines={["/a/<alias>/ · /a/<alias>/report.md · /a/<alias>.json", "/p/sha256-<hex>/ · manifest.json", "/healthz"]} />
+    </section>
+
+    <section class="u-container sec sec--03">
+      <SectionHead num="03" title="Routes & caching" id="routes" />
+      <div class="routes-wrap">
+        <table class="routes">
+          <thead data-pagefind-ignore><tr><th>Route</th><th>Audience</th><th>Caching</th></tr></thead>
+          <tbody>
+            {routeRows.map((r) => (
+              <tr>
+                <td>{r.route}</td>
+                <td>{r.audience}</td>
+                <td><span class:list={["cache", r.caching === "immutable" ? "cache--immutable" : "cache--none"]}>{r.caching}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* page05 never sets line-height on its root, so everything not given one
+     explicitly is `normal`. The docs pages keep body's 1.55 for prose. */
+  .p05 { line-height: normal; }
+
+  /* ---- Hero: page05 div[22] + section[23] ---------------------------- */
+  .hero {
+    /* background #1b2434; border-bottom 1px #293548. Always dark. */
+    background: #1b2434;
+    color: #f1f5f9;
+    border-bottom: 1px solid #293548;
+  }
+  .hero__row {
+    /* page05: padding 72px 20px 64px; flex-wrap; gap 44px.
+       One deliberate departure, from the maintainer's review of pass 2: align-items
+       center, not page05's flex-end, so the terminal sits centred against the
+       copy column. page05's own hero content gives the 542px band. */
+    padding-block: 72px 64px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 44px;
+    align-items: center;
+  }
+  .hero__copy {
+    /* flex 1 1 480px; column; gap 20px */
+    flex: 1 1 480px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hero__eyebrow {
+    /* 14px / 600 / #93c5fd, page sans (inherited) */
+    font-size: 14px;
+    font-weight: 600;
+    color: #93c5fd;
+  }
+  .hero__title {
+    /* page05 h1: Libron 700; clamp(2.8rem, 6.4vw, 5.25rem); line-height .98;
+       letter-spacing -0.02em. page05's export rendered in a narrower fallback
+       serif; in Libron "Sealed editions" is 616.6px at 81.92px, wider than
+       the 588px column, so the headline broke onto three lines. The maintainer's call
+       (2026-11-18): keep Libron and page05's two-line composition by scaling
+       the whole clamp by 77/84 (max 77px). line-height and letter-spacing
+       stay page05's ratios. */
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--hero-title-size);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    /* Where the stacked hero is narrow, pick the even break ("Sealed
+       editions / for agent work.") rather than leaving "work." alone.
+       Changes nothing where the text already fits on one or two lines. */
+    text-wrap: balance;
+  }
+  .hero__pitch {
+    /* 1.1875rem; line-height 1.6; #e2e8f0; max-width 54ch */
+    margin: 0;
+    font-size: 1.1875rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    max-width: 54ch;
+  }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    /* height 44px; padding 0 18px; radius 6.4px; 600 */
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 6.4px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn--primary { background: #60a5fa; color: #0b0f17; }
+  .btn--ghost { border: 1px solid #94a3b8; color: #f1f5f9; }
+
+  .term {
+    /* flex 1 1 500px; 1px #475569; radius 6.4px; shadow 0 16px 40px
+       rgba(11,15,23,.45); JetBrains Mono 0.8125rem / 1.7 */
+    flex: 1 1 500px;
+    min-width: 0;
+    border: 1px solid #475569;
+    border-radius: 6.4px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(11, 15, 23, 0.45);
+    font-family: var(--font-code);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+  .term__bar {
+    /* padding 8px 14px; #111827; border-bottom #293548; #9ca3af 12px */
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #111827;
+    border-bottom: 1px solid #293548;
+    color: #9ca3af;
+    font-size: 12px;
+  }
+  .term__body {
+    /* padding 14px 16px 16px; #0b0f17; #f1f5f9; pre; overflow-x auto */
+    margin: 0;
+    padding: 14px 16px 16px;
+    background: #0b0f17;
+    color: #f1f5f9;
+    font: inherit;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .t-muted { color: #9ca3af; }
+  .t-proven { color: #a7f3d0; font-weight: 700; }
+  .t-id { color: #93c5fd; font-weight: 700; }
+  .t-url { color: #93c5fd; }
+
+  /* ---- Sections: page05 section[46] / [107] / [207] ------------------- */
+  .sec {
+    /* padding 56px 20px 0; column. Sides come from .u-container. */
+    padding-top: 56px;
+    display: flex;
+    flex-direction: column;
+  }
+  .sec--01 { gap: 18px; }
+  .sec--02 { gap: 6px; }
+  .sec--03 { gap: 12px; padding-bottom: 72px; }
+  /* ---- 01 Plate 1: page05 figure[50] ---------------------------------- */
+  .fig { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .plate {
+    /* #f8fafc; 1px #e2e8f0; padding 40px 36px 56px. The ID pill hangs into
+       the 56px bottom padding, so the caption sits 12px below the plate. */
+    position: relative;
+    background: var(--surface-subtle);
+    border: 1px solid var(--line-subtle);
+    padding: 40px 36px 56px;
+  }
+  .plate__corner { position: absolute; width: 14px; height: 14px; border: 0 solid var(--line-strong); }
+  .plate__corner--tl { top: 8px; left: 8px; border-top-width: 1px; border-left-width: 1px; }
+  .plate__corner--tr { top: 8px; right: 8px; border-top-width: 1px; border-right-width: 1px; }
+  .plate__corner--bl { bottom: 8px; left: 8px; border-bottom-width: 1px; border-left-width: 1px; }
+  .plate__corner--br { bottom: 8px; right: 8px; border-bottom-width: 1px; border-right-width: 1px; }
+  .plate__row { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 0; }
+
+  .src {
+    /* flex 1 1 230px; max 280px; #fff; 1px #cbd5e1; radius 6.4px */
+    flex: 1 1 230px;
+    max-width: 280px;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6.4px;
+    overflow: hidden;
+  }
+  .src__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line-subtle);
+  }
+  .src__head b { font-family: var(--font-code); font-weight: 700; font-size: 13px; }
+  .src__head span { font-size: 12px; color: var(--muted); }
+  .src__code {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--surface-subtle);
+    font-family: var(--font-code);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ink);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .src__code span { color: var(--muted); }
+  .src__exts { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px; border-top: 1px solid var(--line-subtle); }
+  .src__exts span {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--sev-low-ink);
+    background: var(--sev-low-bg);
+    border: 1px solid var(--line);
+    border-radius: 3.5px;
+    padding: 1px 6px;
+  }
+  .arrow {
+    /* flex 0 0 104px; column; center; gap 6px; mono 11px #475569 */
+    flex: 0 0 104px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .pair-wrap { flex: 999 1 520px; min-width: 0; position: relative; }
+  .pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    border: 1.5px solid var(--ink);
+    border-radius: 6.4px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 var(--ink), 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+  .leaf { display: flex; flex-direction: column; }
+  .leaf--human { background: var(--card); }
+  .leaf--agent {
+    /* always dark: #0f172a / #f1f5f9; border-left 1px dashed #475569 */
+    background: #0f172a;
+    color: #f1f5f9;
+    border-left: 1px dashed #475569;
+  }
+  .leaf__head {
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line-subtle);
+  }
+  .leaf__head b { font-family: var(--font-code); font-weight: 700; font-size: 13px; }
+  .leaf__head span { font-size: 12px; font-weight: 600; color: var(--accent-ink); }
+  .leaf--agent .leaf__head { border-bottom-color: #293548; }
+  .leaf--agent .leaf__head span { color: #93c5fd; }
+  .leaf__heading { height: 64px; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  .leaf__h { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; }
+  .leaf__heading--md { font-family: var(--font-code); font-size: 14px; font-weight: 700; }
+  .leaf__hash { color: #9ca3af; }
+  .tag {
+    flex: 0 0 auto;
+    align-self: center;
+    font-family: var(--font-code);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--accent-ink);
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-border);
+    border-radius: 3.5px;
+    padding: 1px 5px;
+  }
+  .leaf__block {
+    flex: 1 1 0%;
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px 18px;
+    border-top: 1px dashed #93c5fd;
+  }
+  .leaf__block .tag { align-self: flex-start; }
+  .leaf__text { font-size: 13.5px; line-height: 1.6; color: var(--ink-secondary); }
+  .leaf__text code {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--code-inline-ink);
+    background: var(--code-inline-bg);
+    border: 1px solid var(--code-inline-border);
+    border-radius: 3.5px;
+    padding: 0 4px;
+  }
+  .leaf--agent .leaf__block { border-top-color: #60a5fa; }
+  .leaf--agent .tag { color: #93c5fd; background: #172554; border-color: #1e3a8a; }
+  .leaf--agent .leaf__text { font-family: var(--font-code); font-size: 12.5px; line-height: 1.65; color: #e2e8f0; }
+  .leaf__foot { padding: 10px 18px; border-top: 1px solid var(--line-subtle); font-size: 12px; color: var(--muted); }
+  .leaf--agent .leaf__foot { border-top-color: #293548; color: #9ca3af; }
+  .pair__dot {
+    position: absolute;
+    left: 50%;
+    bottom: -13px;
+    width: 26px;
+    height: 26px;
+    margin-left: -13px;
+    border-radius: 4px;
+    background: var(--accent);
+    border: 3px solid var(--surface-subtle);
+  }
+  .pair__id { position: absolute; left: 0; right: 0; bottom: -44px; display: flex; justify-content: center; }
+  .pair__id span {
+    font-family: var(--font-code);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--accent-ink);
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-border);
+    border-radius: 3.5px;
+    padding: 2px 8px;
+  }
+  .fig__cap {
+    /* flex-wrap; space-between; gap 8px; 13px #475569; border-bottom 1px
+       #cbd5e1; padding-bottom 10px */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .fig__plate { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); }
+
+  /* ---- 03 Routes table: page05 table[212] ----------------------------- */
+  .routes-wrap { overflow-x: auto; }
+  .routes { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 14.5px; }
+  .routes th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .routes td { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .routes th:first-child, .routes td:first-child { padding-left: 0; }
+  .routes th:last-child, .routes td:last-child { padding-right: 0; }
+  .routes td:first-child { font-family: var(--font-code); font-size: 13px; }
+  .cache { font-family: var(--font-code); font-size: 12px; border-radius: 3.5px; }
+  .cache--none {
+    color: var(--sev-low-ink);
+    background: var(--sev-low-bg);
+    border: 1px solid var(--line);
+    padding: 2px 7px;
+  }
+  .cache--immutable {
+    /* always the inverted badge: #fff on #0f172a, 700, padding 3px 7px */
+    font-weight: 700;
+    color: #ffffff;
+    background: #0f172a;
+    padding: 3px 7px;
+  }
+
+  @media (max-width: 760px) {
+    /* No mobile design exists; this only keeps the plate legible. */
+    .plate { padding: 32px 16px 56px; }
+    .arrow { flex-basis: 100%; flex-direction: row; justify-content: center; }
+  }
+</style>

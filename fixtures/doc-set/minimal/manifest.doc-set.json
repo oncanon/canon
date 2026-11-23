@@ -1,0 +1,7 @@
+{
+  "schema": "doc-set/v1",
+  "pages": [
+    { "id": "a", "path": "/a/", "source": "a.doc.json" },
+    { "id": "b", "path": "/b/", "source": "b.doc.json" }
+  ]
+}

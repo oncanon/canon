@@ -1,0 +1,231 @@
+{
+  "schema": "report/v1",
+  "id": "phase1-local-packet-review",
+  "title": "Local immutable review packets: Phase 1 design review",
+  "subtitle": "Representative fixture exercising every report/v1 component. Measurements and evidence files are illustrative fixture data, not claims about any real system.",
+  "metadata": {
+    "status": "proposed",
+    "classification": "Fixture — representative content",
+    "reviewDate": "2026-09-25",
+    "authors": ["Review publisher fixture"],
+    "reviewRequest": "Architecture review and two open decisions"
+  },
+  "summary": {
+    "verdict": {
+      "confidence": "recommended",
+      "text": ["Adopt content-addressed packets with separate alias records. Identity is stable across machines in the fixture runs ", { "cite": "ev-determinism" }, "; two decisions remain open."]
+    },
+    "paragraphs": [
+      ["A packet is an immutable directory whose content ID is the SHA-256 of its canonical manifest. Aliases such as ", { "code": "latest" }, " are separate mutable records that point at one content ID and never change packet bytes."],
+      ["The main residual risk is cache behavior across alias changes in Safari. The fixture probe ", { "cite": "ev-cache-probe" }, " shows no stale asset once assets are fingerprinted and alias responses are ", { "code": "no-store" }, "."]
+    ],
+    "metrics": {
+      "items": [
+        { "label": "Identical rebuilds", "value": "3 / 3", "evidence": ["ev-determinism"] },
+        { "label": "Build p95", "value": "265", "unit": "ms", "evidence": ["ev-latency"] },
+        { "label": "External requests", "value": "0" },
+        { "label": "Open decisions", "value": "2" }
+      ]
+    }
+  },
+  "evidence": [
+    { "id": "ev-determinism", "title": "Rebuild determinism log (fixture)", "kind": "file", "path": "evidence/build-determinism.txt", "mediaType": "text/plain" },
+    { "id": "ev-cache-probe", "title": "Alias switch cache probe (fixture)", "kind": "file", "path": "evidence/runs/cache-probe.json", "mediaType": "application/json" },
+    { "id": "ev-latency", "title": "Stage latency samples (fixture)", "kind": "file", "path": "evidence/latency.csv", "mediaType": "text/csv" },
+    { "id": "ev-reviewer-notes", "title": "Reviewer interview notes", "kind": "redacted", "reason": "Contains personal remarks not approved for packet distribution." },
+    { "id": "ev-safari-device", "title": "Physical iPad Safari capture", "kind": "unavailable", "reason": "No physical device run was performed for this fixture." }
+  ],
+  "sections": [
+    {
+      "id": "findings",
+      "title": "Findings",
+      "lede": "Each finding states one claim and links the evidence that supports it. Severity ranks impact; the confidence label says how well the claim is established.",
+      "blocks": [
+        {
+          "type": "finding",
+          "id": "F-1",
+          "title": "Stable asset paths serve stale bytes after an alias change",
+          "severity": "high",
+          "confidence": "defect",
+          "claim": "When a stylesheet is served from a stable path with a long cache lifetime, switching the alias to a new packet can leave the browser rendering the new HTML with the old stylesheet.",
+          "evidence": ["ev-cache-probe"],
+          "detail": [
+            { "type": "paragraph", "text": ["The packet builder therefore names every asset by its digest, for example ", { "code": "assets/<sha256>.css" }, ", and the alias endpoint redirects with ", { "code": "Cache-Control: no-store" }, "."] }
+          ]
+        },
+        {
+          "type": "finding",
+          "id": "F-2",
+          "title": "Identity does not depend on machine, clock, or environment",
+          "severity": "medium",
+          "confidence": "proven",
+          "claim": "Three builds from different directories, time zones, and environment orderings produced byte-identical inventories and the same content ID.",
+          "evidence": ["ev-determinism", "ev-latency"]
+        },
+        {
+          "type": "finding",
+          "id": "F-3",
+          "title": "Physical-device Safari behavior is not yet established",
+          "severity": "low",
+          "confidence": "open",
+          "claim": "Engine-level WebKit runs are not a physical iPad. Touch scrolling of wide tables and code needs a device check before this is called proven.",
+          "evidence": ["ev-safari-device", "ev-reviewer-notes"]
+        },
+        {
+          "type": "finding",
+          "id": "F-4",
+          "title": "Authored text is escaped, never interpreted",
+          "severity": "info",
+          "confidence": "proven",
+          "claim": ["Report strings such as ", { "code": "<img src=x onerror=alert(1)>" }, " render as visible text. There is no raw HTML field in report/v1."],
+          "evidence": ["ev-determinism"]
+        }
+      ]
+    },
+    {
+      "id": "design",
+      "title": "Packet layout and publication flow",
+      "blocks": [
+        {
+          "type": "diagram",
+          "id": "publish-flow",
+          "title": "Build, verify, publish, alias",
+          "kind": "flow",
+          "caption": "Aliases are the only mutable step. Verification gates publication and runs again on read-back.",
+          "steps": [
+            { "label": "report/v1 source", "detail": "Structured JSON plus evidence files; no templates." },
+            { "label": "Deterministic build", "detail": "index.html, fingerprinted assets and evidence, manifest, checksums." },
+            { "label": "Verify", "detail": "Recompute every digest and the content ID; never repair.", "gate": true },
+            { "label": "Publish", "detail": "Stage, verify, rename to packets/<content-id>/; read back." },
+            { "label": "Alias", "detail": "Compare-and-swap aliases/<name>.json to the new content ID." }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "layout",
+          "caption": "packet/v1 files and cache policy",
+          "columns": [
+            { "key": "path", "label": "Path" },
+            { "key": "role", "label": "Role" },
+            { "key": "media", "label": "Media type" },
+            { "key": "cache", "label": "Served cache policy" },
+            { "key": "identity", "label": "In content ID" }
+          ],
+          "rows": [
+            { "path": [{ "code": "index.html" }], "role": "Entry", "media": "text/html; charset=utf-8", "cache": "immutable, 1 year (under /p/<id>/)", "identity": "Yes" },
+            { "path": [{ "code": "assets/<sha256>.css" }], "role": "Stylesheet", "media": "text/css; charset=utf-8", "cache": "immutable, 1 year", "identity": "Yes" },
+            { "path": [{ "code": "evidence/<sha256>.<ext>" }], "role": "Evidence", "media": "text/plain, text/csv, application/json", "cache": "immutable, 1 year", "identity": "Yes" },
+            { "path": [{ "code": "manifest.json" }], "role": "Identity record", "media": "application/json", "cache": "immutable, 1 year", "identity": "Is the identity" },
+            { "path": [{ "code": "aliases/<name>.json" }], "role": "Mutable alias (outside packet)", "media": "application/json", "cache": "no-store", "identity": "No" }
+          ]
+        },
+        {
+          "type": "code",
+          "id": "content-id",
+          "title": "src/packet/build.mjs — content ID derivation",
+          "language": "typescript",
+          "caption": "Highlighted lines are the identity boundary: only the canonical manifest without its own ID is hashed.",
+          "highlight": [[7, 8]],
+          "source": "const identity = {\n  schema: 'packet/v1',\n  entry: 'index.html',\n  report: { schema: report.schema, id: report.id, sourceSha256 },\n  files: inventory, evidence: evidenceRelations, build: { tool: TOOL.name, version: TOOL.version },\n};\nconst contentId = `sha256-${sha256Hex(canonicalBytes(identity))}`; // canonical JSON: sorted keys, no whitespace, RFC 8785 number form\nconst manifest = { ...identity, contentId };\n/* Receipts, timestamps, and destination paths are written elsewhere and never enter `identity`. */"
+        },
+        {
+          "type": "diff",
+          "id": "cache-fix",
+          "title": "server: alias responses become non-cacheable redirects",
+          "language": "typescript",
+          "caption": "Before the change, the alias path served packet bytes directly with the packet's long cache lifetime.",
+          "patch": "--- a/src/server/server.mjs\n+++ b/src/server/server.mjs\n@@ -41,7 +41,9 @@ async function handleAlias(req, res, name) {\n   const record = await readAlias(root, name);\n-  return servePacketFile(res, record.contentId, 'index.html', { cache: 'public, max-age=31536000' });\n+  res.statusCode = 307;\n+  res.setHeader('Location', `/p/${record.contentId}/`);\n+  res.setHeader('Cache-Control', 'no-store');\n+  return res.end();\n }"
+        },
+        {
+          "type": "code",
+          "id": "verify-cmd",
+          "title": "Verify and publish from a shell",
+          "language": "shell",
+          "source": "# Build, verify, and publish; each step exits non-zero on any mismatch.\ncanon build fixtures/report/phase1-review.report.json --out dist/packet --receipt dist/build-receipt.json\ncanon verify dist/packet && canon publish dist/packet --root dist/store --build-receipt dist/build-receipt.json\ncanon alias set review \"$CONTENT_ID\" --root dist/store --expect-generation 0"
+        }
+      ]
+    },
+    {
+      "id": "measurements",
+      "title": "Measurements",
+      "blocks": [
+        {
+          "type": "chart",
+          "id": "stage-latency",
+          "title": "p95 latency by stage (fixture samples)",
+          "kind": "bar",
+          "unit": "ms",
+          "caption": "Twenty illustrative samples per stage. Values are printed beside each bar.",
+          "evidence": ["ev-latency"],
+          "series": [
+            { "label": "Build", "value": 265 },
+            { "label": "Verify", "value": 51 },
+            { "label": "Publish", "value": 90 },
+            { "label": "First render", "value": 210 }
+          ]
+        },
+        {
+          "type": "code",
+          "id": "cache-probe",
+          "title": "evidence/runs/cache-probe.json (excerpt)",
+          "language": "json",
+          "source": "{\n  \"probe\": \"alias-switch-stale-asset\",\n  \"browser\": \"webkit\",\n  \"staleAssetServed\": false\n}"
+        }
+      ]
+    },
+    {
+      "id": "decisions",
+      "title": "Decisions",
+      "lede": "What needs a decision, the recommendation, and the alternatives considered.",
+      "blocks": [
+        {
+          "type": "decision",
+          "id": "D-1",
+          "question": "Should packets ever include first-party JavaScript?",
+          "status": "needed",
+          "owner": "Maintainer",
+          "recommendation": "No for Phase 1. Every reading feature works without script, and a script-src 'none' policy is simpler to verify.",
+          "alternatives": [
+            { "label": "No script", "summary": "Strictest CSP; copy-to-clipboard and theme toggles are omitted." },
+            { "label": "Hashed first-party script", "summary": "Allows small enhancements; requires hash-based CSP and a script review for every change." }
+          ]
+        },
+        {
+          "type": "decision",
+          "id": "D-2",
+          "question": "How are concurrent alias updates resolved?",
+          "status": "decided",
+          "recommendation": "Compare-and-swap on the alias generation under an exclusive lock file; a stale expectation fails rather than overwriting.",
+          "alternatives": [
+            { "label": "Last writer wins", "summary": "Simple, but silently discards a concurrent update." },
+            { "label": "Compare-and-swap", "summary": "Callers state the generation they expect; mismatches fail loudly.", "chosen": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "risks",
+      "title": "Risks",
+      "blocks": [
+        { "type": "risk", "id": "R-1", "title": "Crashed alias writer leaves a lock file", "likelihood": "low", "impact": "medium", "mitigation": "Updates fail closed with an explicit alias-locked error; the operator removes the lock after confirming no writer is running." },
+        { "type": "risk", "id": "R-2", "title": "Evidence contains sensitive material", "likelihood": "medium", "impact": "high", "mitigation": ["Evidence is copied only when declared as a file; withheld items are listed as redacted or unavailable ", { "cite": "ev-reviewer-notes" }, "."] }
+      ]
+    }
+  ],
+  "appendices": [
+    {
+      "id": "limits",
+      "title": "Source limits",
+      "blocks": [
+        { "type": "list", "items": ["Report JSON: 1 MiB, nesting depth 16.", "Evidence: 32 files, 4 MiB each, 16 MiB total; text/plain, text/csv, application/json only.", "Code: 200 KiB and 4,000 lines per block, 1 MiB total.", ["External links: ", { "code": "https:" }, " only, for example ", { "link": { "href": "https://www.w3.org/TR/CSP3/", "text": "Content Security Policy Level 3" } }, "."]] }
+      ]
+    }
+  ],
+  "provenance": {
+    "sources": [
+      { "label": "Phase 1 brief", "reference": "pilots/phase1/BRIEF.md", "sha256": "d2ef4d8867e9780f36079fbe71ae87778deeae70b4af48b32b07661ba65eef38" },
+      { "label": "Repository bootstrap", "reference": "review-publisher", "revision": "3b026fa59dcb92edef0960e0b9c118f17d9e2cc0" }
+    ],
+    "notes": "This report is a fixture. Its measurements and evidence files are illustrative and exist to exercise the renderer, not to prove anything about a real system."
+  }
+}

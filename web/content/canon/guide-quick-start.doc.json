@@ -1,0 +1,161 @@
+{
+  "schema": "doc/v1",
+  "id": "guide-quick-start",
+  "title": "Quick start: your first Brief",
+  "eyebrow": "Guide",
+  "description": "This quick start takes one report/v1 brief through build, verify, publish, alias and serve, end to end on 127.0.0.1.",
+  "sections": [
+    {
+      "id": "1-write-a-report-v1-brief",
+      "title": "1. Write a report/v1 brief",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "Save this as ",
+            {
+              "code": "report.json"
+            },
+            ". See ",
+            {
+              "ref": {
+                "page": "schemas",
+                "text": "Schemas"
+              }
+            },
+            " for the full shape."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "source": "{\n  \"schema\": \"report/v1\",\n  \"id\": \"first-brief\",\n  \"title\": \"First Brief\",\n  \"metadata\": {\n    \"status\": \"draft\",\n    \"classification\": \"Internal\",\n    \"reviewDate\": \"2026-11-18\",\n    \"authors\": [\"You\"],\n    \"reviewRequest\": \"Read the summary and confirm the verdict\"\n  },\n  \"summary\": {\n    \"verdict\": {\n      \"confidence\": \"proven\",\n      \"text\": \"Canon seals this brief into one human page and one agent file.\"\n    },\n    \"paragraphs\": [\"This is the smallest complete report/v1 brief.\"]\n  },\n  \"evidence\": [\n    {\n      \"id\": \"ev-none\",\n      \"title\": \"No evidence yet\",\n      \"kind\": \"unavailable\",\n      \"reason\": \"First brief; nothing to attach.\"\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"s-1\",\n      \"title\": \"Summary\",\n      \"blocks\": [\n        { \"type\": \"paragraph\", \"text\": \"Sections hold typed blocks.\" }\n      ]\n    }\n  ],\n  \"provenance\": {\n    \"sources\": [{ \"label\": \"Quick start\", \"reference\": \"oncanon.com\" }]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "id": "2-build-and-verify-the-packet",
+      "title": "2. Build and verify the packet",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "mkdir -p dist\nnode src/cli.mjs build report.json --out dist/packet --receipt dist/build-receipt.json\nnode src/cli.mjs verify dist/packet"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            {
+              "code": "build"
+            },
+            " writes ",
+            {
+              "code": "dist/packet/index.html"
+            },
+            ", ",
+            {
+              "code": "report.md"
+            },
+            ", ",
+            {
+              "code": "manifest.json"
+            },
+            " and ",
+            {
+              "code": "checksums.json"
+            },
+            ". ",
+            {
+              "code": "verify"
+            },
+            " independently recomputes every digest and the content ID; it exits ",
+            {
+              "code": "1"
+            },
+            " on any mismatch and never repairs."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3-publish-and-point-an-alias",
+      "title": "3. Publish and point an alias",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "node src/cli.mjs publish dist/packet --root dist/review-store --build-receipt dist/build-receipt.json\nCONTENT_ID=$(node -p \"require('./dist/packet/manifest.json').contentId\")\nnode src/cli.mjs alias set first-brief \"$CONTENT_ID\" --root dist/review-store --expect-generation 0"
+        },
+        {
+          "type": "paragraph",
+          "text": "Publishing the same bytes twice is a no-op; publishing different bytes under an existing content ID fails without touching the stored packet. An alias is a small mutable pointer outside the packet, updated by compare-and-swap on its generation — it never changes packet bytes."
+        }
+      ]
+    },
+    {
+      "id": "4-serve-it-locally",
+      "title": "4. Serve it locally",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "node src/cli.mjs service start --root dist/review-store --state-dir dist/service --port 8791\ncurl -fsS http://127.0.0.1:8791/healthz\nopen http://127.0.0.1:8791/a/first-brief/"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            {
+              "code": "/a/first-brief/"
+            },
+            " is the human entry; the same alias at ",
+            {
+              "code": "/a/first-brief/report.md"
+            },
+            " is the byte-verified agent entry. Both 307-redirect (so they're never cached) to the immutable ",
+            {
+              "code": "/p/sha256-<hex>/"
+            },
+            " edition behind the alias — resolve the alias once, then keep the immutable URL. Binding is loopback-only by default; reaching it from an iPhone or iPad on the same Tailscale network needs an explicit ",
+            {
+              "code": "--tailscale"
+            },
+            " flag (see the ",
+            {
+              "ref": {
+                "page": "cli",
+                "text": "CLI reference",
+                "anchor": "workstation-server"
+              }
+            },
+            ")."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "node src/cli.mjs service stop --state-dir dist/service"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "Next: the complete ",
+            {
+              "ref": {
+                "page": "cli",
+                "text": "CLI reference"
+              }
+            },
+            ", or the ",
+            {
+              "ref": {
+                "page": "schemas",
+                "text": "report/v1 and site-input/v1 schemas"
+              }
+            },
+            "."
+          ]
+        }
+      ]
+    }
+  ]
+}

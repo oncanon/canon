@@ -1,0 +1,158 @@
+{
+  "schema": "doc/v1",
+  "id": "guide-install",
+  "title": "Install",
+  "eyebrow": "Guide",
+  "description": "Install Canon with Homebrew: one cask for Canon.app and the canon CLI, or one formula for the CLI alone. You can also run it from source with Node.js 22+.",
+  "sections": [
+    {
+      "id": "requirements",
+      "title": "Requirements",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            "macOS 14 or later, on Apple silicon or Intel.",
+            [
+              {
+                "text": "Homebrew, for the "
+              },
+              {
+                "code": "brew"
+              },
+              {
+                "text": " commands below."
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homebrew",
+      "title": "Install with Homebrew",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "To install Canon.app and the ",
+            {
+              "code": "canon"
+            },
+            " CLI together:"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "brew install --cask oncanon/tap/canon-app"
+        },
+        {
+          "type": "paragraph",
+          "text": "To install only the CLI:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "brew install oncanon/tap/canon"
+        }
+      ]
+    },
+    {
+      "id": "updates",
+      "title": "Updates",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "Canon.app updates itself through Sparkle. To update the CLI, run ",
+            {
+              "code": "brew upgrade"
+            },
+            "."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "from-source",
+      "title": "From source",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "To run Canon from its Git repository, you need Node.js 22 or newer and a clone of the repository:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "git clone https://github.com/oncanon/canon.git\ncd canon\nnpm ci --offline   # dev tooling only; safe to skip if you trust node_modules already present\nnode src/cli.mjs   # prints usage"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "Run it as ",
+            {
+              "code": "node src/cli.mjs <command>"
+            },
+            " from the repository root, or put the repository on your ",
+            {
+              "code": "PATH"
+            },
+            " and use the ",
+            {
+              "code": "canon"
+            },
+            " bin entry in ",
+            {
+              "code": "package.json"
+            },
+            "."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "The builder, verifier and server use only the Node.js standard library — nothing else is installed at runtime. ",
+            {
+              "code": "npm ci"
+            },
+            " brings in dev-only tooling (tests, the browser checker, the Markdown parser used by the test suite); it is never required to build, verify, publish or serve a packet."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agent-skill",
+      "title": "Agent skill",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Coding agents that support the Agent Skills format can install Canon's own skill directly from this repository:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "npx skills@latest add OWNER/canon"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "The skill teaches an agent to build and share Canon Briefs and SitReps while distinguishing local-only, Tailscale, and gated remote-target visibility. Installing it grants no publication or cloud authority on its own — every remote write still needs an explicit ",
+            {
+              "code": "--grant"
+            },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "nav": {
+    "next": {
+      "ref": {
+        "page": "guide-quick-start",
+        "text": "Quick start: your first Brief"
+      }
+    }
+  }
+}

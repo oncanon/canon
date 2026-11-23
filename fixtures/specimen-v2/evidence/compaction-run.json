@@ -1,0 +1,18 @@
+{
+  "harness": "wal-bench/0.4.2",
+  "workload": "mixed-append-compaction-8w",
+  "durationSeconds": 1800,
+  "operations": 14400000,
+  "legacyCopy": {
+    "p99Ms": 148.4,
+    "pageCacheChurnMiBPerSec": 612.5,
+    "crcMismatchCount": 0,
+    "tailStallEventsOver100Ms": 1842
+  },
+  "zeroCopyRing": {
+    "p99Ms": 4.6,
+    "pageCacheChurnMiBPerSec": 38.2,
+    "crcMismatchCount": 0,
+    "tailStallEventsOver100Ms": 0
+  }
+}

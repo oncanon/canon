@@ -1,0 +1,51 @@
+{
+  "schema": "deploy-token-scopes/v1",
+  "description": "The one scope list for the Cloudflare deploy token (rp-deploy-<run>): account-owned, this account only, 1-day expiry, used only by the maintainer at terraform/tofu apply time. Every document that lists these scopes must agree with this file; test/unit/pv-deploy-token-scopes.test.mjs enforces it (V2-QA-3). Terraform/OpenTofu creates the R2 bucket, the D1 database and the Worker (lead decision, 2026-09-27), so the token carries exactly the scopes that IaC needs.",
+  "sufficiencyForApply": "NOT_EXECUTED: whether these scopes together suffice for `apply` is shown only by the first authorized apply. 'verified' says only that a scope's documented description covers its resource.",
+  "granted": [
+    {
+      "permission": "Workers Scripts Edit",
+      "neededFor": "cloudflare_workers_script (the Worker) and cloudflare_workers_script_subdomain (its workers.dev route)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to Cloudflare Workers scripts.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "Workers R2 Storage Edit",
+      "neededFor": "cloudflare_r2_bucket (Terraform creates the test bucket)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to Cloudflare R2 Storage.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "D1 Edit",
+      "neededFor": "cloudflare_d1_database, and the schema over the D1 query API (scripts/d1-schema.mjs, runbook step 7; V2.1 replaces wrangler); held for the token's whole 1-day life, not only during migrations (architecture.md deviation 18)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants write access to D1.\"",
+      "necessity": "verified"
+    },
+    {
+      "permission": "Account Settings Read",
+      "neededFor": "account discovery by the provider (wrangler is no longer used; the Scope proof settles whether it is needed)",
+      "source": "docs/v2/research/cloudflare-adapter.md §3.7 [S34] (Workers Builds default token; workers-sdk issue #9129); https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-27): \"Grants read access to Account resources, account membership, and account level features.\"",
+      "necessity": "unverified; drop if apply succeeds without it"
+    },
+    {
+      "permission": "Access: Apps and Policies Edit",
+      "neededFor": "cloudflare_zero_trust_access_application and cloudflare_zero_trust_access_policy (V2.1 Access as code; runbook step 6)",
+      "source": "https://raw.githubusercontent.com/cloudflare/terraform-provider-cloudflare/v5.26.0/docs/resources/zero_trust_access_policy.md (read 2026-09-29): \"Accepted Permissions: Access: Apps and Policies Read, Access: Apps and Policies Write\"; https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-09-28) lists it as \"Access: Apps and Policies Edit\"",
+      "necessity": "verified"
+    }
+  ],
+  "notGranted": [
+    {
+      "permission": "Access: Service Tokens Edit",
+      "reason": "the service token is created in the dashboard (runbook step 4), so its secret never enters Terraform state"
+    },
+    {
+      "permission": "Zone · Workers Routes Edit",
+      "reason": "no zone and no route: workers.dev only"
+    },
+    {
+      "permission": "User Details Read / Memberships Read",
+      "reason": "an account-owned token needs no user permissions"
+    }
+  ]
+}

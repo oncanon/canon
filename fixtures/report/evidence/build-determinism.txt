@@ -1,0 +1,6 @@
+# Illustrative fixture evidence (representative shape, not a measurement of this repository).
+run  cwd                         TZ                  env-order  content-id
+1    /tmp/a                      UTC                 sorted     sha256-5d1f0c…e2a9
+2    /var/folders/x/build        America/Chicago     reversed   sha256-5d1f0c…e2a9
+3    /private/tmp/other          Asia/Kolkata        shuffled   sha256-5d1f0c…e2a9
+result: 3/3 identical inventories; 0 differing bytes

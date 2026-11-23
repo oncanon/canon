@@ -1,0 +1,8 @@
+# Copy to test.tfvars. Every value here is an identifier or a public key, never a secret:
+# the public deploy token comes only from the CLOUDFLARE_API_TOKEN environment variable,
+# and the publisher's private signing key never enters Terraform.
+account_id = "<cloudflare-account-id>"
+run_id     = "20260930-a1"
+
+# From scripts/public-target-keygen.mjs (it prints this line; the private half stays with the operator).
+publisher_public_key = "canon-ed25519-pk:<43-base64url-characters>"

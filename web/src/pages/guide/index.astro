@@ -1,0 +1,30 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { BASE } from "../../lib/base";
+---
+<DocsLayout
+  title="Guide"
+  eyebrow="Start here"
+  current="guide"
+  description="The Canon guide takes you from installing the CLI to building, verifying and serving your first sealed edition on your own machine."
+>
+  <h2 id="install">Install</h2>
+  <p>
+    Canon is a Node.js CLI with no runtime dependencies beyond the standard library. See
+    <a href={`${BASE}guide/install/`}>Install</a> for requirements and the one-line setup.
+  </p>
+
+  <h2 id="quick-start-your-first-brief">Quick start: your first Brief</h2>
+  <p>
+    Build, verify, publish, alias, and serve a <code>report/v1</code> brief in about five
+    minutes, entirely on <code>127.0.0.1</code>. See
+    <a href={`${BASE}guide/quick-start/`}>Quick start: your first Brief</a>.
+  </p>
+
+  <h2 id="where-to-go-next">Where to go next</h2>
+  <ul>
+    <li><a href={`${BASE}schemas/`}>Schemas</a> — the two source schemas and the two immutable outputs they build.</li>
+    <li><a href={`${BASE}cli/`}>CLI reference</a> — every subcommand, checked against the real CLI.</li>
+    <li><a href={`${BASE}canon-app/`}>Canon.app</a> — the macOS menu-bar companion.</li>
+  </ul>
+</DocsLayout>

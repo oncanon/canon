@@ -1,0 +1,24 @@
+node_modules/
+dist/
+_site/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+# Cloudflare IaC run residue: never committed (V2.1). The provider lockfile IS committed.
+infra/cloudflare/terraform/.terraform/
+infra/cloudflare/terraform/*.tfstate
+infra/cloudflare/terraform/*.tfstate.*
+infra/cloudflare/terraform/*.tfplan
+infra/cloudflare/terraform/test.tfvars
+# The public target's module (V2.1 slice 04): the same residue rules. Its lockfile IS committed.
+infra/cloudflare/terraform-public/.terraform/
+infra/cloudflare/terraform-public/*.tfstate
+infra/cloudflare/terraform-public/*.tfstate.*
+infra/cloudflare/terraform-public/*.tfplan
+infra/cloudflare/terraform-public/test.tfvars
+# Local proof-run output (see evidence/README.md). Only the pointer file is tracked.
+/evidence/*
+!/evidence/README.md
+/.build/

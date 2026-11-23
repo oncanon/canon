@@ -1,0 +1,39 @@
+{
+  "name": "canon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic local/tailnet typesetting builder, verifier, store, and server for sealed HTML + Markdown editions.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "canon": "./src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "scripts/public-target-keygen.mjs"
+  ],
+  "scripts": {
+    "test": "CANON_LOOPBACK_ONLY=1 node --test 'test/unit/*.test.mjs' 'test/*.test.mjs'",
+    "test:browser": "CANON_LOOPBACK_ONLY=1 node --test --test-concurrency=1 'test/browser/*.test.mjs'",
+    "build:golden": "node src/cli.mjs build fixtures/report/phase1-review.report.json --out dist/golden --receipt dist/golden.build-receipt.json",
+    "brief": "node src/cli.mjs brief",
+    "brief:fixture": "node src/cli.mjs brief fixtures/report/phase1-review.report.json --store dist/review-store --alias phase1-review",
+    "serve": "node src/cli.mjs serve --root dist/review-store",
+    "service:start": "node src/cli.mjs service start --root dist/review-store --state-dir dist/service",
+    "service:start:tailscale": "node src/cli.mjs service start --root dist/review-store --state-dir dist/service --tailscale",
+    "service:status": "node src/cli.mjs service status --state-dir dist/service",
+    "service:stop": "node src/cli.mjs service stop --state-dir dist/service",
+    "service:restart": "node src/cli.mjs service restart --state-dir dist/service",
+    "service:clean": "node src/cli.mjs service clean --state-dir dist/service --store dist/review-store",
+    "test:tailnet": "CANON_LIVE_TAILNET=1 node --test --test-concurrency=1 test/unit/e3-bind.test.mjs test/browser/e5-tailscale.test.mjs",
+    "proof:tailnet-access": "node scripts/e2e-access.mjs --tailnet"
+  },
+  "devDependencies": {
+    "axe-core": "4.13.0",
+    "commonmark": "^0.31.2",
+    "playwright-core": "1.62.1"
+  }
+}

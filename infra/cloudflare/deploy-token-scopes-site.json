@@ -1,0 +1,19 @@
+{
+  "schema": "deploy-token-scopes/v1",
+  "description": "The one scope list for the SITE deploy token: the CLOUDFLARE_API_TOKEN secret of oncanon/canon, used only by .github/workflows/site.yml to upload web/dist to the project oncanon with `wrangler pages deploy`. Account-owned, this account only, no expiry so that every push to main can deploy; rotate it by hand. It is a separate token from the private and public deploy tokens and carries nothing else. The custom domain oncanon.com is bound once by the account owner in the dashboard, so this token holds no DNS scope. Every document that lists these scopes must agree with this file; test/unit/pv-deploy-token-scopes.test.mjs enforces it.",
+  "sufficiencyForApply": "NOT_EXECUTED: whether this scope suffices for `wrangler pages deploy` is shown only by the first authorized deploy. 'verified' says only that the scope's documented description covers its resource.",
+  "granted": [
+    {
+      "permission": "Cloudflare Pages Edit",
+      "neededFor": "wrangler pages deploy web/dist --project-name=oncanon (production on main, previews on pull requests)",
+      "source": "https://developers.cloudflare.com/fundamentals/api/reference/permissions/ (read 2026-11-21): \"Grants access to create, edit and delete Cloudflare Pages projects.\"",
+      "necessity": "verified"
+    }
+  ],
+  "notGranted": [
+    { "permission": "Workers Scripts Edit", "reason": "the site is static; the publisher Worker is deployed with its own token" },
+    { "permission": "Workers R2 Storage Edit", "reason": "the site deploy writes no bucket" },
+    { "permission": "D1 Edit", "reason": "the site deploy writes no database" },
+    { "permission": "Account Settings Read", "reason": "wrangler gets the account from CLOUDFLARE_ACCOUNT_ID, so it needs no account discovery" }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "schema": "doc/v1",
+  "id": "guide-install",
+  "title": "Install",
+  "eyebrow": "Guide",
+  "description": "Canon runs as a Node.js 22+ command-line tool straight from its Git repository, with no cloud account, no database and no runtime dependencies.",
+  "sections": [
+    {
+      "id": "requirements",
+      "title": "Requirements",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            "Node.js 22 or newer.",
+            [{ "text": "A clone of the " }, { "code": "canon" }, { "text": " repository." }]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "The builder, verifier and server use only the Node.js standard library — nothing else is installed at runtime. ",
+            { "code": "npm ci" },
+            " brings in dev-only tooling (tests, the browser checker, the Markdown parser used by the test suite); it is never required to build, verify, publish or serve a packet."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "get-the-cli",
+      "title": "Get the CLI",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "git clone https://github.com/oncanon/canon.git\ncd canon\nnpm ci --offline   # dev tooling only; safe to skip if you trust node_modules already present\nnode src/cli.mjs   # prints usage"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "There is no global install step yet: run it as ",
+            { "code": "node src/cli.mjs <command>" },
+            " from the repository root, or put the repository on your ",
+            { "code": "PATH" },
+            " and use the ",
+            { "code": "canon" },
+            " bin entry in ",
+            { "code": "package.json" },
+            "."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agent-skill",
+      "title": "Agent skill",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Coding agents that support the Agent Skills format can install Canon's own skill directly from this repository:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "source": "npx skills@latest add OWNER/canon"
+        },
+        {
+          "type": "paragraph",
+          "text": [
+            "The skill teaches an agent to build and share Canon Briefs and SitReps while distinguishing local-only, Tailscale, and gated remote-target visibility. Installing it grants no publication or cloud authority on its own — every remote write still needs an explicit ",
+            { "code": "--grant" },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "nav": {
+    "next": {
+      "ref": { "page": "guide-quick-start", "text": "Quick start: your first Brief" }
+    }
+  },
+  "provenance": {
+    "sources": [
+      {
+        "label": "Hand-transcribed from the Astro source",
+        "reference": "web/src/pages/guide/install/index.astro",
+        "revision": "44f2f65"
+      }
+    ],
+    "notes": "doc/v1 spike fixture (core/doc-v1-spike); no validator or renderer exists yet. Transcribed content only — DocsLayout/BaseLayout chrome (site nav, hero, footer, head/meta, CSS) is not represented here."
+  }
+}

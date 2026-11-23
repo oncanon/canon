@@ -1,0 +1,27 @@
+// Publisher V2 test deployment: wrangler configuration (provider-validation slice 06).
+// PREPARED, NOT RUN: wrangler is not installed, and installing it is maintainer decision 6.
+//
+// Terraform (infra/cloudflare/terraform) owns the Worker, bucket, database and the
+// workers.dev route. This file exists for the one thing Terraform cannot do: applying
+// the D1 schema, with `wrangler d1 migrations apply rp-aliases-test-<run> --remote`.
+// Do not `wrangler deploy` from here: two tools deploying one Worker would drift.
+// Replace the <placeholders> from `terraform output`. No secret belongs in this file.
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "rp-publisher-test",
+  "main": "../../../src/publication/worker/index.mjs",
+  "compatibility_date": "2026-09-26",
+  "workers_dev": true,
+  "preview_urls": false,
+  "r2_buckets": [
+    { "binding": "PACKETS", "bucket_name": "rp-packets-test-<run>" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "ALIASES",
+      "database_name": "rp-aliases-test-<run>",
+      "database_id": "<terraform output d1_database_id>",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/check-cli.mjs && node scripts/check-examples.mjs && node scripts/sync-tokens.mjs --check && CANON_DOCS_STAGE=anchors astro build --outDir .canon/anchors-pass && node scripts/canon-docs.mjs input --from .canon/anchors-pass && node scripts/canon-docs.mjs build && astro build && node scripts/canon-docs.mjs publish --dist dist && node scripts/agent-text.mjs --source canon && npx pagefind --site dist --exclude-selectors .doc-eyebrow && node scripts/canon-docs.mjs check --dist dist && node scripts/check-install-feed.mjs --dist dist",
+    "preview": "astro preview",
+    "astro": "astro",
+    "gen:cli": "node scripts/gen-cli.mjs",
+    "check:cli": "node scripts/check-cli.mjs",
+    "sync:tokens": "node scripts/sync-tokens.mjs",
+    "check:tokens": "node scripts/sync-tokens.mjs --check",
+    "screenshot": "node scripts/screenshot.mjs",
+    "agent-text": "node scripts/agent-text.mjs",
+    "og": "node scripts/og-image.mjs",
+    "fidelity:plates": "node scripts/fidelity-plates.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.4.12"
+  },
+  "devDependencies": {
+    "pagefind": "^1.6.0",
+    "playwright": "^1.65.1"
+  }
+}

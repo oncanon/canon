@@ -1,0 +1,27 @@
+---
+// page05 "CLI surface" head: the exit-code pills. Values are page05's inline
+// CSS; the colours are the signal tokens, which equal page05's light values.
+---
+<div class="exit">
+  <span class="exit__label">Exit codes</span>
+  <span class="exit__pill exit__pill--ok"><b>0</b> Success</span>
+  <span class="exit__pill exit__pill--fail"><b>1</b> Verification failed · fail-closed</span>
+  <span class="exit__pill exit__pill--usage"><b>2</b> Usage error</span>
+</div>
+
+<style>
+  .exit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; line-height: normal; }
+  .exit__label { font-weight: 600; color: var(--muted); }
+  .exit__pill {
+    display: inline-flex;
+    gap: 6px;
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: 3.5px;
+    padding: 3px 8px;
+  }
+  .exit__pill b { font-family: var(--font-code); }
+  .exit__pill--ok { color: var(--proven-ink); background: var(--proven-bg); border-color: var(--proven-bd); }
+  .exit__pill--fail { color: var(--defect-ink); background: var(--defect-bg); border-color: var(--defect-bd); }
+  .exit__pill--usage { color: var(--sev-low-ink); background: var(--sev-low-bg); border-color: var(--sev-low-bd); }
+</style>

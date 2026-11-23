@@ -1,0 +1,82 @@
+{
+  "schema": "site-input/v1",
+  "title": "Portfolio situation report (synthetic first slice)",
+  "edition": {
+    "editionId": "synthetic-edition-0001",
+    "editionDigest": "a1b2c3d4e5f60718a9b0c1d2e3f40516a7b8c9d0e1f20314a5b6c7d8e9f00112",
+    "observedAt": "2026-10-12T09:00:00Z",
+    "coverage": { "from": "2026-10-11T09:00:00Z", "to": "2026-10-12T09:00:00Z" }
+  },
+  "registry": {
+    "version": "synthetic-registry-1",
+    "sha256": "0f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a6978"
+  },
+  "areas": [
+    {
+      "areaRef": "platform",
+      "title": "Platform",
+      "counts": { "waiting": 3, "moved": 1, "blocked": 0, "coverage": "complete", "gapRefs": [], "unit": "original waiting items" },
+      "projects": [
+        { "projectRef": "packets", "title": "Review packets" }
+      ]
+    },
+    {
+      "areaRef": "research",
+      "title": "Research",
+      "counts": { "waiting": null, "moved": null, "blocked": null, "coverage": "unavailable", "gapRefs": ["research-unread"], "unit": "original waiting items" },
+      "projects": []
+    }
+  ],
+  "items": [
+    {
+      "itemRef": "retention-window",
+      "areaRef": "platform",
+      "projectRef": "packets",
+      "title": "Retention window for published packets",
+      "age": "waiting 2 days",
+      "blocks": [
+        { "type": "paragraph", "text": ["The packet store keeps every edition. The owner asks how long an edition must stay readable; see ", { "cite": "queue-snapshot" }, "."] },
+        { "type": "risk", "id": "store-growth", "title": "The store grows without a limit", "likelihood": "medium", "impact": "low", "mitigation": "Choose a window and prune by alias history." }
+      ]
+    },
+    {
+      "itemRef": "orphan-request",
+      "areaRef": null,
+      "projectRef": null,
+      "title": "A request with no mapped area",
+      "age": "waiting 5 hours",
+      "blocks": [],
+      "gapRefs": ["orphan-unmapped"]
+    }
+  ],
+  "decisions": [
+    {
+      "decisionRef": "retention-choice",
+      "label": "Choose the retention window",
+      "kind": "choice",
+      "itemRef": "retention-window",
+      "questions": [
+        {
+          "questionRef": "retention-length",
+          "text": "How long must a published edition stay readable?",
+          "options": [
+            { "optionRef": "days-30", "label": "30 days", "summary": "Shortest window; the smallest store." },
+            { "optionRef": "days-90", "label": "90 days", "summary": "Covers a quarter of reviews." },
+            { "optionRef": "keep-all", "label": "Keep everything", "summary": "No pruning; the store grows." }
+          ],
+          "recommendation": { "optionRef": "days-90", "text": "90 days covers every review cycle seen so far." },
+          "freeText": { "allowed": true, "maxChars": 500 },
+          "evidence": ["queue-snapshot"]
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    { "id": "queue-snapshot", "title": "Queue snapshot", "kind": "file", "path": "evidence/queue-snapshot.txt", "mediaType": "text/plain" },
+    { "id": "owner-thread", "title": "Owner thread", "kind": "unavailable", "reason": "The thread is held by its owner and was not exported." }
+  ],
+  "gaps": [
+    { "gapRef": "research-unread", "kind": "coverage", "text": "The research area was not read in this edition." },
+    { "gapRef": "orphan-unmapped", "kind": "mapping", "text": "This request names no area in the registry." }
+  ]
+}

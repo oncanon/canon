@@ -1,0 +1,44 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+<DocsLayout
+  title="Open source"
+  eyebrow="License"
+  description="Canon is open-source software under the Apache License 2.0; this page says what is open and what comes later."
+>
+  <h2 id="license">License</h2>
+  <p>
+    Canon is licensed under the
+    <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="noopener">Apache License 2.0</a>
+    (SPDX <code>Apache-2.0</code>). The full text is the <code>LICENSE</code> file at the root of
+    the repository.
+  </p>
+
+  <h2 id="whats-open">What's open</h2>
+  <p>
+    The builder, verifier, local server, and this documentation site are the open-source surface:
+    a provider-neutral packet format, a fail-closed verifier, and a loopback/Tailscale server —
+    all runnable offline with nothing but Node.js.
+  </p>
+
+  <h2 id="whats-not-yet-in-this-repository">What's not (yet) in this repository</h2>
+  <p>
+    Hosted public sharing and bring-your-own-domain publishing are planned commercial features
+    that come later, separately from the open-source core, and are not part of this release.
+  </p>
+
+  <h2 id="fonts">Fonts</h2>
+  <p>
+    Libron, Inter and JetBrains Mono, all vendored locally, are licensed under the
+    <a href="https://scripts.sil.org/OFL" rel="noopener">SIL Open Font License 1.1</a>. Their
+    license files ship alongside the font binaries in this site's <code>public/fonts/</code>.
+  </p>
+
+  <h2 id="third-party-dependencies">Third-party dependencies</h2>
+  <p>
+    The packet builder, verifier and server depend on nothing but the Node.js standard library.
+    Dev-only tooling (tests, the browser checker) and this documentation site's own build
+    (Astro, Pagefind) carry their own upstream licenses, declared in their respective
+    <code>package.json</code> files.
+  </p>
+</DocsLayout>

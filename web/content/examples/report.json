@@ -1,0 +1,45 @@
+{
+  "schema": "report/v1",
+  "id": "cache-review",
+  "title": "Cache layer review",
+  "metadata": {
+    "status": "proposed",
+    "classification": "Internal",
+    "reviewDate": "2026-11-18",
+    "authors": ["Platform team"],
+    "reviewRequest": "Approve the eviction change"
+  },
+  "summary": {
+    "verdict": { "confidence": "recommended", "text": "Ship the LRU change." },
+    "paragraphs": ["Hit rate rises from 71% to 88% on the replay."]
+  },
+  "evidence": [
+    {
+      "id": "ev-replay",
+      "title": "Replay results",
+      "kind": "file",
+      "path": "evidence/replay.csv",
+      "mediaType": "text/csv"
+    }
+  ],
+  "sections": [
+    {
+      "id": "findings",
+      "title": "Findings",
+      "blocks": [
+        {
+          "type": "finding",
+          "id": "F-1",
+          "title": "LRU beats FIFO on real traffic",
+          "severity": "medium",
+          "confidence": "proven",
+          "claim": "The replay shows a 17-point hit-rate gain.",
+          "evidence": ["ev-replay"]
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "sources": [{ "label": "Replay harness", "reference": "tools/replay" }]
+  }
+}

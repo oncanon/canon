@@ -1,0 +1,4 @@
+queue snapshot (synthetic)
+waiting 3
+moved 1
+blocked 0

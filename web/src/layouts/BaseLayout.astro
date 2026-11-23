@@ -1,0 +1,91 @@
+---
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { BASE } from "../lib/base";
+import { SITE, abs } from "../lib/site";
+import { organization, softwareApplication, techArticle, breadcrumbList, graph, type Crumb } from "../lib/jsonld";
+import "../styles/global.css";
+
+interface Props {
+  /** The page's own name; the <title> becomes "{title} · Canon" unless fullTitle is set. */
+  title: string;
+  /** One plain sentence saying what the page is. Meta, Open Graph, JSON-LD and llms.txt use it. */
+  description: string;
+  fullTitle?: string;
+  current?: "guide" | "cli" | "schemas" | "canon-app";
+  /** "home": SoftwareApplication + Organization. "doc": TechArticle + BreadcrumbList. "none": no JSON-LD, noindex (404). */
+  kind?: "home" | "doc" | "none";
+}
+const { title, description, fullTitle, current, kind = "doc" }: Props = Astro.props;
+
+const pageTitle = fullTitle ?? `${title} · ${SITE.name}`;
+const canonical = abs(Astro.url.pathname);
+const ogImage = abs(SITE.ogImage.path);
+
+// Breadcrumbs from the URL: Canon › Guide › Install. Only "guide" has
+// children today; its name is the Guide page's title.
+const SECTION_NAMES: Record<string, string> = { guide: "Guide" };
+function crumbs(): Crumb[] {
+  const parts = Astro.url.pathname.split("/").filter(Boolean);
+  const out: Crumb[] = [{ name: SITE.name, url: abs("/") }];
+  parts.forEach((p, i) => {
+    const last = i === parts.length - 1;
+    out.push({ name: last ? title : (SECTION_NAMES[p] ?? p), url: abs(`/${parts.slice(0, i + 1).join("/")}/`) });
+  });
+  return out;
+}
+
+const ld =
+  kind === "home"
+    ? graph([
+        organization({ origin: SITE.origin, name: SITE.name, logo: abs(SITE.logo), sameAs: [SITE.repository] }),
+        softwareApplication({
+          origin: SITE.origin, name: SITE.name, description, category: "DeveloperApplication",
+          requirements: SITE.requirements, image: ogImage, license: SITE.license,
+        }),
+      ])
+    : kind === "doc"
+      ? graph([
+          techArticle({ origin: SITE.origin, url: canonical, headline: title, description, image: ogImage }),
+          breadcrumbList(canonical, crumbs()),
+        ])
+      : null;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {kind === "none" ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content={kind === "doc" ? "article" : "website"} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {kind !== "none" && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content={String(SITE.ogImage.width)} />
+    <meta property="og:image:height" content={String(SITE.ogImage.height)} />
+    <meta property="og:image:alt" content={SITE.ogImage.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={SITE.ogImage.alt} />
+    <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
+    <link rel="sitemap" type="application/xml" href={`${BASE}sitemap.xml`} />
+    <link rel="preload" href={`${BASE}fonts/libron/Libron-Bold.woff2`} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={`${BASE}fonts/libron/Libron-Regular.woff2`} as="font" type="font/woff2" crossorigin />
+    {ld && <script type="application/ld+json" set:html={ld} />}
+  </head>
+  <body>
+    <Nav current={current} />
+    {/* Pagefind indexes only pages with data-pagefind-body, so the 404 stays out of search. */}
+    <main data-pagefind-body={kind !== "none" ? "" : undefined}>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

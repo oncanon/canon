@@ -1,0 +1,45 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { BASE } from "../../lib/base";
+---
+<DocsLayout
+  title="Canon.app"
+  eyebrow="macOS companion"
+  current="canon-app"
+  description="Canon.app is a planned macOS menu-bar app that will show the local Canon server's status and aliases without the terminal; it is not built yet."
+>
+  <p class="placeholder-flag"><span class="doc__tbd">Placeholder</span> This page is a stand-in; Canon.app's design and build are a separate, not-yet-started workstream.</p>
+
+  <h2 id="what-it-will-do">What it will do</h2>
+  <p>
+    Canon.app sits in the macOS menu bar next to the <code>canon service</code> daemon it talks
+    to. It will show, at a glance:
+  </p>
+  <ul>
+    <li>whether the workstation server is running, and on which address (loopback, Tailscale, or stopped);</li>
+    <li>the alias list, with one-tap open, copy URL, and copy content ID per alias;</li>
+    <li>a restart and a "verify now" action for the current store.</li>
+  </ul>
+  <p>
+    Icon states are planned to mirror the server's own binding rules: a loopback dot, a tailnet
+    ring, and a hollow icon when the service is stopped — never a state the CLI itself couldn't
+    reach.
+  </p>
+
+  <h2 id="what-it-wont-do">What it won't do</h2>
+  <p>
+    Canon.app only reads and displays what the local <code>canon service</code> already serves. It
+    does not publish, grant, or bind on its own — any remote-target action still goes through the
+    same explicit <code>--grant</code> gate as the CLI.
+  </p>
+
+  <h2 id="status">Status</h2>
+  <p>
+    Not yet built. Today the CLI's <code>canon status</code> and <code>canon service status</code>
+    cover the same ground from a terminal; see the <a href={`${BASE}cli/`}>CLI reference</a>.
+  </p>
+</DocsLayout>
+
+<style>
+  .placeholder-flag { display: flex; gap: 0.6rem; align-items: baseline; }
+</style>

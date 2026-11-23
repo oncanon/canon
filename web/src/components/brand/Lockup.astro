@@ -1,0 +1,52 @@
+---
+// The wordmark lockup as shipped artwork (identity rule 02: "The logo is
+// artwork, never typed text. Ship the SVG lockups"). The SVGs in ./svg are
+// outlined from Libron Bold by scripts/brand/outline-lockup.py at the exact
+// positions the identity plate's CSS produces; there is no <text> in them and
+// no font dependency. Nobody re-sets or respaces the word here: the only
+// input is the size of the word, and the artwork scales as one piece.
+//
+//   display: Plate 1 A, "Display lockup, on the rule" (84px word, 86px
+//            symbol, 20px gap, 3px rule 13px below). Docs hero.
+//   ui:      Plate 1, "UI lockup, no rule" (34px word, 35px symbol, 8px gap).
+//            Nav.
+import displayChrome from "./svg/lockup-display-chrome.svg?raw";
+import displayPaper from "./svg/lockup-display-paper.svg?raw";
+import uiChrome from "./svg/lockup-ui-chrome.svg?raw";
+import uiPaper from "./svg/lockup-ui-paper.svg?raw";
+
+interface Props {
+  variant?: "display" | "ui";
+  surface?: "chrome" | "paper";
+  /** The size of the word "canon" (any CSS length); the artwork scales from it. */
+  wordSize: string;
+}
+const { variant = "ui", surface = "chrome", wordSize }: Props = Astro.props;
+
+const ART = {
+  display: { chrome: displayChrome, paper: displayPaper, ref: 84 },
+  ui: { chrome: uiChrome, paper: uiPaper, ref: 34 },
+} as const;
+const art = ART[variant];
+// Artwork width in units of the reference word size, read from the SVG itself.
+const vbWidth = Number(/viewBox="0 0 ([\d.]+) /.exec(art[surface])![1]);
+const svg = art[surface].replace(/ width="[\d.]+" height="[\d.]+"/, "");
+---
+<span
+  class="lockup"
+  style={`--lockup-word: ${wordSize}; --lockup-w: ${(vbWidth / art.ref).toFixed(4)}`}
+  set:html={svg}
+/>
+
+<style>
+  .lockup {
+    display: inline-block;
+    line-height: 0;
+    width: calc(var(--lockup-w) * var(--lockup-word));
+  }
+  .lockup :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

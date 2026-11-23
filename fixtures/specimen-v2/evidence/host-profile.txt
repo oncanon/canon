@@ -1,0 +1,4 @@
+kernel: Darwin 24.1.0 arm64 (Apple M3 Max, 16 cores, 64 GiB unified memory)
+filesystem: APFS case-insensitive, F_FULLFSYNC enabled on segment seal
+node: v22.14.0
+ulimit -n: 65536

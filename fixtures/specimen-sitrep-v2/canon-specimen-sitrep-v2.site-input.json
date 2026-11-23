@@ -1,0 +1,544 @@
+{
+  "schema": "site-input/v1",
+  "title": "Platform & Storage Engineering — Weekly SitRep",
+  "edition": {
+    "editionId": "sitrep-specimen-2026-w46-v2",
+    "editionDigest": "89abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+    "observedAt": "2026-11-14T18:00:00Z",
+    "coverage": {
+      "from": "2026-11-07T18:00:00Z",
+      "to": "2026-11-14T18:00:00Z"
+    }
+  },
+  "registry": {
+    "version": "registry-specimen-2026.11.2",
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "areas": [
+    {
+      "areaRef": "storage",
+      "title": "Storage Engine & WAL",
+      "counts": {
+        "waiting": 2,
+        "moved": 5,
+        "blocked": 1,
+        "coverage": "complete",
+        "gapRefs": [],
+        "unit": "workstream items"
+      },
+      "projects": [
+        {
+          "projectRef": "wal-compaction",
+          "title": "Zero-Copy WAL Compaction"
+        },
+        {
+          "projectRef": "snapshot-tiering",
+          "title": "Cold Object Tiering"
+        }
+      ]
+    },
+    {
+      "areaRef": "runtime",
+      "title": "Control Plane & Tailscale Edge",
+      "counts": {
+        "waiting": 1,
+        "moved": 3,
+        "blocked": null,
+        "coverage": "partial",
+        "gapRefs": ["gap-edge-blocked-metric"],
+        "unit": "workstream items"
+      },
+      "projects": [
+        {
+          "projectRef": "canon-daemon",
+          "title": "Canon Workstation Daemon"
+        }
+      ]
+    },
+    {
+      "areaRef": "hardware-lab",
+      "title": "Bare-Metal Power-Loss Lab",
+      "counts": {
+        "waiting": null,
+        "moved": null,
+        "blocked": null,
+        "coverage": "unavailable",
+        "gapRefs": ["gap-lab-offline"],
+        "unit": "workstream items"
+      },
+      "projects": []
+    }
+  ],
+  "items": [
+    {
+      "itemRef": "wal-standby-ring",
+      "title": "Pre-allocated standby segment ring sizing & epoch sweeper",
+      "areaRef": "storage",
+      "projectRef": "wal-compaction",
+      "age": "waiting 2 days",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "Zero-copy mmap compaction cut append p99 from 148.4 ms to 4.6 ms across 14.4M synthetic mixed-workload operations ",
+            { "cite": "ev-compaction-json" },
+            ". Before canary cutover, compaction workers MUST defer ",
+            { "code": "munmap()" },
+            " until all active reader epochs clear, and operator sign-off is required on the per-shard warm standby segment pool."
+          ]
+        },
+        {
+          "type": "finding",
+          "id": "find-ring-churn",
+          "title": "Eliminating transient 64 KiB heap buffers cuts page-cache churn by 93.8%",
+          "severity": "critical",
+          "confidence": "proven",
+          "verification": {
+            "band": "code",
+            "detail": "cargo test -p wal --test epoch_reclaim"
+          },
+          "claim": [
+            "Dirty page-cache writeback falls from 612.5 MiB/s to 38.2 MiB/s under 8 concurrent writers, eliminating all > 100 ms append stalls ",
+            { "cite": "ev-latency-csv" },
+            ", ",
+            { "cite": "ev-compaction-json" },
+            "."
+          ],
+          "evidence": ["ev-latency-csv", "ev-compaction-json"]
+        },
+        {
+          "type": "diagram",
+          "id": "topo-wal-ring",
+          "kind": "topology",
+          "title": "Standby segment ring & epoch reclamation topology",
+          "caption": "Writers rotate pre-zeroed standby segments in O(1) while the epoch sweeper gates munmap() on pinned reader leases.",
+          "groups": [
+            {
+              "id": "g-hot-append",
+              "label": "Append Path",
+              "nodes": [
+                {
+                  "id": "n-writer",
+                  "label": "Shard Writer",
+                  "sublabel": "Lock-free cursor",
+                  "role": "entry"
+                },
+                {
+                  "id": "n-ring",
+                  "label": "Standby Ring",
+                  "sublabel": "2 x 64 MiB warm pool",
+                  "role": "core"
+                }
+              ]
+            },
+            {
+              "id": "g-reclaim-gate",
+              "label": "Reclamation & Store",
+              "nodes": [
+                {
+                  "id": "n-sweeper",
+                  "label": "Epoch Sweeper",
+                  "sublabel": "min_reader_epoch guard",
+                  "role": "gate"
+                },
+                {
+                  "id": "n-nvme",
+                  "label": "NVMe WAL Store",
+                  "sublabel": "Sealed 64 MiB segments",
+                  "role": "store"
+                }
+              ]
+            }
+          ],
+          "edges": [
+            { "from": "n-writer", "to": "n-ring", "label": "atomic swap" },
+            { "from": "n-ring", "to": "n-nvme", "label": "fdatasync seal" },
+            { "from": "n-nvme", "to": "n-sweeper", "label": "retire gate", "style": "gate" }
+          ]
+        },
+        {
+          "type": "chart",
+          "id": "cmp-sitrep-p99",
+          "kind": "comparison",
+          "title": "Stage p99 latency: legacy heap copy vs epoch-pinned zero-copy",
+          "baselineLabel": "Legacy heap copy",
+          "candidateLabel": "Zero-copy mmap ring",
+          "higherIsBetter": false,
+          "unit": "ms",
+          "series": [
+            { "label": "WAL append", "baseline": 148.4, "value": 4.6 },
+            { "label": "Segment seal", "baseline": 119.5, "value": 11.8 },
+            { "label": "Index rebuild", "baseline": 134.0, "value": 22.4 }
+          ],
+          "caption": "Synthetic 8-writer mixed workload over 30 minutes (14.4M operations).",
+          "evidence": ["ev-latency-csv"]
+        },
+        {
+          "type": "chart",
+          "id": "quant-wal-tail",
+          "kind": "quantiles",
+          "title": "Zero-copy latency distribution against 15 ms canary budget",
+          "unit": "ms",
+          "budget": 15.0,
+          "series": [
+            { "label": "WAL append (zero-copy)", "p50": 0.4, "p95": 1.9, "p99": 4.6, "max": 11.2 },
+            { "label": "Segment seal (zero-copy)", "p50": 2.1, "p95": 6.4, "p99": 11.8, "max": 19.4 }
+          ],
+          "caption": "Both p99 markers remain inside the 15.0 ms canary budget; seal max (p99.9 = 19.4 ms) reflects double-rollover burst.",
+          "evidence": ["ev-latency-csv"]
+        },
+        {
+          "type": "comparison",
+          "id": "cmp-rollover-path",
+          "title": "Segment rollover allocation contrast",
+          "left": {
+            "label": "On-demand fallocate() (v1)",
+            "tone": "legacy",
+            "summary": "Allocates and zeroes a new 64 MiB segment synchronously on the writer thread.",
+            "items": [
+              "Blocks writer cursor behind filesystem extent & journal lock",
+              "Triggered 1,842 > 100 ms tail stalls during 30-minute run"
+            ],
+            "code": {
+              "language": "typescript",
+              "source": "const fd = fs.openSync(nextPath, 'w+');\nfs.ftruncateSync(fd, 67_108_864); // blocks writer!\nthis.activeFd = fd;"
+            }
+          },
+          "right": {
+            "label": "Pre-zeroed standby ring (v2)",
+            "tone": "proposed",
+            "summary": "Swaps a pre-allocated standby descriptor in O(1) atomic pointer exchange.",
+            "items": [
+              "Background replenishment thread calls fallocate() off the critical path",
+              "Zero > 100 ms stalls across 14.4M operations"
+            ],
+            "code": {
+              "language": "typescript",
+              "source": "const warm = this.standbyRing.claimReady();\nthis.activeSlot.swap(warm); // O(1) pointer swap\nthis.replenisher.scheduleRefill();"
+            }
+          }
+        },
+        {
+          "type": "requirement",
+          "id": "req-epoch-pin",
+          "title": "Epoch-guarded segment reclamation",
+          "pattern": "state",
+          "statement": "WHILE any active reader lease holds epoch <= segment.max_epoch, the compaction sweeper SHALL retain the read-only mmap region and MUST NOT unlink the backing segment.",
+          "verification": {
+            "band": "code",
+            "detail": "crates/wal/tests/epoch_reclaim.rs"
+          },
+          "scenarios": [
+            {
+              "name": "Pinned reader defers munmap()",
+              "given": "segment seg-000479 is retired at epoch 9104 and 4 readers hold epoch 9098",
+              "when": "the compaction sweeper scans retired segments",
+              "then": "seg-000479 remains mapped until all 4 readers advance >= 9104"
+            },
+            {
+              "name": "Expired reader lease triggers copy-on-expire",
+              "given": "a slow snapshot cursor exceeds the 30-second epoch lease",
+              "when": "the lease watchdog fires",
+              "then": "unread frames materialize into a bounded private buffer and the segment unmaps cleanly"
+            }
+          ],
+          "evidence": ["ev-compaction-json", "ev-fsync-trace"]
+        },
+        {
+          "type": "risk",
+          "id": "risk-pinned-cursor",
+          "title": "Slow reader cursor delays retired segment unlink",
+          "likelihood": "medium",
+          "impact": "high",
+          "mitigation": "Enforce 30-second reader epoch lease with bounded copy-on-expire fallback."
+        },
+        {
+          "type": "risk",
+          "id": "risk-nvme-footprint",
+          "title": "Multi-shard warm standby disk reservation",
+          "likelihood": "low",
+          "impact": "medium",
+          "mitigation": "Cap default pool at 2 segments (128 MiB) per active shard with host watermark check."
+        }
+      ]
+    },
+    {
+      "itemRef": "cold-tier-lifecycle",
+      "title": "Immutable archive tar stream alignment for cold S3 objects",
+      "areaRef": "storage",
+      "projectRef": "snapshot-tiering",
+      "age": "blocked 4 days",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "Cold S3 snapshot uploads are blocked on archive framing sign-off. Streaming verification MUST preserve deterministic SHA-256 parity with sealed segment manifests ",
+            { "cite": "ev-fsync-trace" },
+            " and benchmark outputs ",
+            { "cite": "ev-compaction-json" },
+            "."
+          ]
+        },
+        {
+          "type": "diagram",
+          "id": "seq-cold-seal",
+          "kind": "sequence",
+          "title": "Cold-tier deterministic tar seal & verification handshake",
+          "caption": "Every cold object is hash-verified against the manifest CAS before S3 upload commit.",
+          "actors": [
+            { "id": "a-compact", "label": "Compactor" },
+            { "id": "a-tar", "label": "POSIX Tar" },
+            { "id": "a-verify", "label": "Seal Verifier" },
+            { "id": "a-s3", "label": "Cold S3 Bucket" }
+          ],
+          "messages": [
+            { "from": "a-compact", "to": "a-tar", "label": "stream sealed 64 MiB segment", "kind": "sync" },
+            { "from": "a-tar", "to": "a-verify", "label": "emit canonical ustar + sha256", "kind": "sync", "gate": true, "note": "Rejects non-zero mtime/uid/gid headers" },
+            { "from": "a-verify", "to": "a-s3", "label": "PutObject (If-None-Match: *)", "kind": "sync" },
+            { "from": "a-s3", "to": "a-compact", "label": "200 OK + ETag receipt", "kind": "reply" }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tier-cost-tbl",
+          "caption": "Cold snapshot compression & streaming verification trade-offs",
+          "columns": [
+            { "key": "format", "label": "Envelope" },
+            { "key": "ratio", "label": "Compression ratio", "numeric": true },
+            { "key": "verify", "label": "Verify throughput (MiB/s)", "numeric": true },
+            { "key": "deps", "label": "Runtime decoder dependency" }
+          ],
+          "rows": [
+            { "format": "POSIX ustar (uncompressed)", "ratio": "1.00x", "verify": "1,840", "deps": "None (stdlib byte-seekable)" },
+            { "format": "tar.zst (Zstandard level 3)", "ratio": "2.84x", "verify": "1,420", "deps": "Pinned libzstd >= 1.5.6" }
+          ]
+        }
+      ]
+    },
+    {
+      "itemRef": "tailnet-host-pinning",
+      "title": "DNS-rebinding Host allowlist & CanonBar menu reconciliation",
+      "areaRef": "runtime",
+      "projectRef": "canon-daemon",
+      "age": "moved today",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Shipped strict HTTP Host header pinning across loopback and Tailscale interfaces alongside live CanonBar status reconciliation."
+        },
+        {
+          "type": "diff",
+          "id": "host-header-diff",
+          "title": "src/server/server.mjs — strict Host header check",
+          "language": "javascript",
+          "caption": "Rejects non-allowlisted Host headers with HTTP 421 Misdirected Request before serving any bundle route.",
+          "patch": "--- a/src/server/server.mjs\n+++ b/src/server/server.mjs\n@@ -64,4 +64,7 @@ function verifyHostHeader(req, allowedHosts) {\n+  if (!allowedHosts.has(String(req.headers.host ?? '').toLowerCase())) {\n+    return { ok: false, status: 421 };\n+  }\n   return { ok: true };\n }"
+        }
+      ]
+    },
+    {
+      "itemRef": "legacy-v1-palette-cleanup",
+      "title": "Retire deprecated v1 warm-beige token aliases after v2 cutover",
+      "areaRef": "runtime",
+      "projectRef": "canon-daemon",
+      "age": "waiting 19 days",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Tracking ticket from the initial prototype stylesheet; v2 archival slate tokens supersede all legacy warm-paper variables."
+        }
+      ]
+    },
+    {
+      "itemRef": "unmapped-nvme-ticket",
+      "title": "Inbound firmware advisory for enterprise U.2 NVMe namespace flush",
+      "areaRef": null,
+      "projectRef": null,
+      "age": "waiting 6 hours",
+      "gapRefs": ["gap-unmapped-intake"],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": [
+            "Vendor bulletin received via intake queue regarding intermittent ",
+            { "code": "fdatasync()" },
+            " latency spikes on firmware 2B4Q; awaiting ownership assignment between Storage Engine and Bare-Metal Power-Loss Lab ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "decisionRef": "dec-standby-segments",
+      "itemRef": "wal-standby-ring",
+      "kind": "architecture",
+      "label": "Approve per-shard warm standby pool & reader lease policy",
+      "questions": [
+        {
+          "questionRef": "q-standby-count",
+          "text": "How many 64 MiB standby segments should each shard pre-allocate?",
+          "options": [
+            {
+              "optionRef": "opt-one-seg",
+              "label": "1 segment (64 MiB)",
+              "summary": "Minimal disk footprint, but back-to-back burst rollovers can still hit synchronous fallocate()."
+            },
+            {
+              "optionRef": "opt-two-seg",
+              "label": "2 segments (128 MiB)",
+              "summary": "Absorbs double-rollover bursts with zero append stalls across all 8-writer benchmarks."
+            },
+            {
+              "optionRef": "opt-four-seg",
+              "label": "4 segments (256 MiB)",
+              "summary": "Over-reserves NVMe space on high-density multi-shard hosts without measurable p99 gain."
+            }
+          ],
+          "freeText": { "allowed": true, "maxChars": 500 },
+          "recommendation": {
+            "optionRef": "opt-two-seg",
+            "text": "Pre-allocate 2 segments (128 MiB) per shard to eliminate rollover stalls while keeping multi-shard NVMe reservation bounded."
+          },
+          "evidence": ["ev-latency-csv", "ev-compaction-json"]
+        },
+        {
+          "questionRef": "q-lease-timeout",
+          "text": "Which reader-epoch lease timeout should gate copy-on-expire reclamation?",
+          "options": [
+            {
+              "optionRef": "opt-10s",
+              "label": "10-second lease",
+              "summary": "Reclaims disk fastest, but risks copying long analytical scans prematurely."
+            },
+            {
+              "optionRef": "opt-30s",
+              "label": "30-second lease",
+              "summary": "Covers 99.98% of point-in-time reads without triggering copy-on-expire."
+            }
+          ],
+          "freeText": { "allowed": false },
+          "recommendation": {
+            "optionRef": "opt-30s",
+            "text": "Enforce a 30-second reader epoch lease so analytical scans complete zero-copy while bounding worst-case segment retention."
+          },
+          "evidence": ["ev-fsync-trace"]
+        }
+      ]
+    },
+    {
+      "decisionRef": "dec-archive-codec",
+      "itemRef": "cold-tier-lifecycle",
+      "kind": "policy",
+      "label": "Select cold-tier deterministic archive envelope",
+      "questions": [
+        {
+          "questionRef": "q-archive-format",
+          "text": "Should cold snapshots remain uncompressed deterministic POSIX tar or add Zstandard framing?",
+          "options": [
+            {
+              "optionRef": "opt-raw-tar",
+              "label": "Deterministic POSIX tar",
+              "summary": "Zero external codec dependencies; byte-stream seekable at 1,840 MiB/s."
+            },
+            {
+              "optionRef": "opt-zstd-tar",
+              "label": "Zstandard-framed tar (level 3)",
+              "summary": "2.84x smaller storage footprint; requires pinned zstd decoder across all verifiers."
+            }
+          ],
+          "freeText": { "allowed": false },
+          "recommendation": {
+            "optionRef": "opt-raw-tar",
+            "text": "Keep uncompressed deterministic POSIX tar until cold store volume exceeds 50 GiB."
+          },
+          "evidence": ["ev-fsync-trace"]
+        }
+      ]
+    },
+    {
+      "decisionRef": "dec-retire-v1-theme",
+      "itemRef": "legacy-v1-palette-cleanup",
+      "kind": "close-candidate",
+      "label": "Close superseded v1 warm-beige token cleanup ticket",
+      "questions": [
+        {
+          "questionRef": "q-close-v1-ticket",
+          "text": "Confirm closing legacy v1 warm-beige cleanup ticket as superseded by Canon v2?",
+          "options": [
+            {
+              "optionRef": "opt-close-superseded",
+              "label": "Close as superseded",
+              "summary": "Canon v2 replaces the entire v1 stylesheet token layer across packet/v1 and site-bundle/v1."
+            },
+            {
+              "optionRef": "opt-keep-open",
+              "label": "Keep open until main merge",
+              "summary": "Retain ticket in backlog until folio-design-v2 fast-forwards main."
+            }
+          ],
+          "freeText": { "allowed": false },
+          "recommendation": {
+            "optionRef": "opt-close-superseded",
+            "text": "Close as superseded once folio-design-v2 lands."
+          }
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "gapRef": "gap-edge-blocked-metric",
+      "kind": "telemetry-gap",
+      "text": "Daemon exporter omitted the blocked-ticket counter during W46 rolling restart; waiting and moved counts remain partial."
+    },
+    {
+      "gapRef": "gap-lab-offline",
+      "kind": "facility-maintenance",
+      "text": "Bare-metal power-cut rack is offline for scheduled PDU maintenance window through Monday 09:00 UTC."
+    },
+    {
+      "gapRef": "gap-unmapped-intake",
+      "kind": "mapping",
+      "text": "Vendor U.2 NVMe firmware advisory has not yet been assigned between Storage Engine and Bare-Metal Power-Loss Lab."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-latency-csv",
+      "title": "Stage latency percentiles & allocation profile (CSV)",
+      "kind": "file",
+      "path": "evidence/wal-latency.csv",
+      "mediaType": "text/csv"
+    },
+    {
+      "id": "ev-compaction-json",
+      "title": "30-minute mixed-workload benchmark summary (JSON)",
+      "kind": "file",
+      "path": "evidence/compaction-run.json",
+      "mediaType": "application/json"
+    },
+    {
+      "id": "ev-fsync-trace",
+      "title": "Segment seal fdatasync & reader-epoch reclamation trace",
+      "kind": "file",
+      "path": "evidence/fsync-trace.txt",
+      "mediaType": "text/plain"
+    },
+    {
+      "id": "ev-nvme-rig",
+      "title": "Bare-metal power-cut telemetry capture",
+      "kind": "unavailable",
+      "reason": "Lab rack PDU maintenance window in progress."
+    }
+  ],
+  "history": [
+    {
+      "editionId": "sitrep-specimen-2026-w45",
+      "contentId": "sha256-9cfaa7ec54ed3c0dae6edd041507eb4d9cbd0ddd029ae768aaf875210837304c",
+      "observedAt": "2026-11-06T21:00:00Z"
+    }
+  ]
+}

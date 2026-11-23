@@ -1,0 +1,20 @@
+{
+  "schema": "doc/v1",
+  "id": "a",
+  "title": "Page A",
+  "description": "The first page in a minimal, fully-resolving doc set.",
+  "sections": [
+    {
+      "id": "intro",
+      "title": "Intro",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": ["See ", { "ref": { "page": "b", "anchor": "details", "text": "Page B's details" } }, " for more."]
+        }
+      ]
+    }
+  ],
+  "nav": { "next": { "ref": { "page": "b", "text": "Page B" } } },
+  "seeAlso": [{ "ref": { "page": "b", "anchor": "details", "text": "Page B" } }]
+}

@@ -1,0 +1,12 @@
+{
+  "fixture": "illustrative",
+  "probe": "alias-switch-stale-asset",
+  "browser": "webkit",
+  "steps": [
+    { "request": "/a/review/", "status": 307, "cacheControl": "no-store" },
+    { "request": "/p/sha256-aaaa/assets/1111.css", "status": 200, "cacheControl": "public, max-age=31536000, immutable" },
+    { "request": "/a/review/", "status": 307, "cacheControl": "no-store", "note": "alias switched" },
+    { "request": "/p/sha256-bbbb/assets/2222.css", "status": 200, "cacheControl": "public, max-age=31536000, immutable" }
+  ],
+  "staleAssetServed": false
+}

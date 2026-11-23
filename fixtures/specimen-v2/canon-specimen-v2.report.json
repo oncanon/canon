@@ -1,0 +1,773 @@
+{
+  "schema": "report/v1",
+  "id": "wal-zero-copy-compaction-audit-v2",
+  "title": "Zero-Copy Write-Ahead Log Compaction & Tail-Latency Audit",
+  "subtitle": "Canon v2 design specimen applying House Rules (HR-000 / HR-004), SVG topology & sequence diagrams, grouped speedup & quantile charts, side-by-side concept contrasts, EARS + Gherkin requirements, and inline evidence previews.",
+  "metadata": {
+    "status": "proposed",
+    "classification": "Architecture & Performance Audit · Canon v2 Specimen",
+    "reviewDate": "2026-11-14",
+    "authors": [
+      "Storage Engine Group",
+      "Systems Verification Rig"
+    ],
+    "reviewRequest": "Approve epoch-guarded mmap compaction and select the warm-ring segment count in Decision D-1."
+  },
+  "publication": {
+    "classification": "private-review",
+    "dataOrigin": "synthetic"
+  },
+  "summary": {
+    "verdict": {
+      "confidence": "recommended",
+      "text": [
+        "Adopt epoch-guarded ",
+        { "code": "mmap" },
+        " segment slices with pre-sealed CRC-32C trailers. Across 14.4M mixed operations, append p99 drops from ",
+        { "strong": "148.4 ms to 4.6 ms (32.3× faster)" },
+        " with zero stalls above 100 ms ",
+        { "cite": "ev-compaction-json" },
+        ". Compaction workers MUST defer ",
+        { "code": "munmap()" },
+        " until all pinned reader epochs clear ",
+        { "cite": "ev-fsync-trace" },
+        "."
+      ]
+    },
+    "paragraphs": [
+      [
+        "Legacy compaction allocates transient 64 KiB heap buffers per frame and triggers synchronous page-cache writeback during rollover ",
+        { "cite": "ev-latency-csv" },
+        ". Active readers hold file-offset locks, so one slow cursor blocks reclamation across the entire shard."
+      ],
+      [
+        "The proposed ",
+        { "em": "epoch-pinned ring segment" },
+        " separates append, seal, and reclamation into three lock-free phases. Readers pin a monotonic epoch and borrow zero-copy ",
+        { "code": "Uint8Array.subarray()" },
+        " views directly from mapped pages ",
+        { "cite": "ev-fsync-trace" },
+        ". Synthetic benchmark inputs follow ",
+        {
+          "link": {
+            "href": "https://www.rfc-editor.org/rfc/rfc8785",
+            "text": "RFC 8785 Canonical JSON"
+          }
+        },
+        " identity rules."
+      ]
+    ],
+    "metrics": {
+      "items": [
+        {
+          "label": "Append p99 latency",
+          "value": "4.6",
+          "unit": "ms",
+          "evidence": ["ev-latency-csv", "ev-compaction-json"]
+        },
+        {
+          "label": "Tail stalls (>100 ms)",
+          "value": "0",
+          "unit": "events",
+          "evidence": ["ev-compaction-json"]
+        },
+        {
+          "label": "Heap alloc / op",
+          "value": "0.5",
+          "unit": "KiB",
+          "evidence": ["ev-latency-csv"]
+        },
+        {
+          "label": "Page-cache churn",
+          "value": "-93.8",
+          "unit": "%",
+          "evidence": ["ev-compaction-json"]
+        }
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "ev-latency-csv",
+      "title": "Stage latency percentiles & allocation profile (CSV)",
+      "kind": "file",
+      "path": "evidence/wal-latency.csv",
+      "mediaType": "text/csv"
+    },
+    {
+      "id": "ev-compaction-json",
+      "title": "30-minute mixed-workload benchmark summary (JSON)",
+      "kind": "file",
+      "path": "evidence/compaction-run.json",
+      "mediaType": "application/json"
+    },
+    {
+      "id": "ev-fsync-trace",
+      "title": "Segment seal fdatasync & reader-epoch reclamation trace",
+      "kind": "file",
+      "path": "evidence/fdatasync-trace.txt",
+      "mediaType": "text/plain"
+    },
+    {
+      "id": "ev-host-profile",
+      "title": "Workstation kernel & APFS mount profile (uncited baseline)",
+      "kind": "file",
+      "path": "evidence/host-profile.txt",
+      "mediaType": "text/plain"
+    },
+    {
+      "id": "ev-customer-keys",
+      "title": "Production tenant shard-key distribution trace",
+      "kind": "redacted",
+      "reason": "Contains tenant partition identifiers; replaced by synthetic Zipfian workload parameters."
+    },
+    {
+      "id": "ev-nvme-powerloss",
+      "title": "Hardware NVMe capacitor power-cut replay log",
+      "kind": "unavailable",
+      "reason": "Scheduled on dedicated Linux bare-metal bench rig prior to final cutover."
+    }
+  ],
+  "sections": [
+    {
+      "id": "architecture",
+      "title": "System Topology & Concept Contrast",
+      "lede": "Visualizing the three-plane storage architecture, side-by-side read-path mechanics, and lock-free epoch reclamation protocol.",
+      "blocks": [
+        {
+          "type": "diagram",
+          "id": "wal-topology",
+          "title": "Epoch-Guarded Zero-Copy WAL Architecture",
+          "kind": "topology",
+          "caption": [
+            "Writers and readers share immutable 64 MiB ",
+            { "code": "mmap" },
+            " segments; durability and reclamation gates fail closed ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ],
+          "evidence": ["ev-fsync-trace"],
+          "groups": [
+            {
+              "id": "grp-access",
+              "label": "Client & Cursor Plane",
+              "nodes": [
+                { "id": "n-writers", "label": "8× Ingest Writers", "sublabel": "atomic fetch_add", "role": "entry" },
+                { "id": "n-readers", "label": "Replay Cursors", "sublabel": "subarray borrow", "role": "entry" }
+              ]
+            },
+            {
+              "id": "grp-core",
+              "label": "Zero-Copy Segment Core",
+              "nodes": [
+                { "id": "n-ring", "label": "Warm mmap Ring", "sublabel": "2× 64 MiB standby", "role": "store" },
+                { "id": "n-seal", "label": "CRC-32C + fdatasync", "sublabel": "1.84 ms seal gate", "role": "gate" },
+                { "id": "n-epochs", "label": "Epoch Slot Table", "sublabel": "64 cache-aligned slots", "role": "core" }
+              ]
+            },
+            {
+              "id": "grp-control",
+              "label": "Manifest & Sweeper Tier",
+              "nodes": [
+                { "id": "n-cas", "label": "Manifest CAS Swap", "sublabel": "expectGeneration", "role": "gate" },
+                { "id": "n-sweep", "label": "Quiescent Sweeper", "sublabel": "deferred munmap", "role": "external" }
+              ]
+            }
+          ],
+          "edges": [
+            { "from": "n-writers", "to": "n-ring", "label": "reserve frame", "style": "solid" },
+            { "from": "n-readers", "to": "n-epochs", "label": "pin(epoch)", "style": "solid" },
+            { "from": "n-readers", "to": "n-ring", "label": "zero-copy slice", "style": "dashed" },
+            { "from": "n-ring", "to": "n-seal", "label": "full 64 MiB", "style": "gate" },
+            { "from": "n-seal", "to": "n-cas", "label": "CRC verified", "style": "gate" },
+            { "from": "n-cas", "to": "n-sweep", "label": "retireEpoch", "style": "solid" },
+            { "from": "n-epochs", "to": "n-sweep", "label": "minActiveEpoch", "style": "dashed" }
+          ]
+        },
+        {
+          "type": "comparison",
+          "id": "cmp-read-path",
+          "title": "Per-Frame Syscall & Heap Copy vs. Epoch-Pinned mmap Slice",
+          "caption": [
+            "Eliminates two ",
+            { "code": "Buffer.allocUnsafe" },
+            " allocations and two ",
+            { "code": "fs.readSync" },
+            " syscalls on every cursor step ",
+            { "cite": "ev-latency-csv" },
+            "."
+          ],
+          "evidence": ["ev-latency-csv"],
+          "left": {
+            "label": "v1 Legacy: Buffered Read + Offset Lock",
+            "tone": "legacy",
+            "summary": "Copies every frame into V8 heap memory while holding a shard-wide segment lock.",
+            "items": [
+              "64.0 KiB transient heap allocation per append operation",
+              "612.5 MiB/s page-cache churn triggers kernel writeback stalls",
+              "One slow consumer blocks segment reclamation across all writers"
+            ],
+            "code": {
+              "language": "typescript",
+              "source": "const hdr = Buffer.allocUnsafe(12);\nfs.readSync(this.fd, hdr, 0, 12, this.off);\nconst len = hdr.readUInt32LE(0);\nconst body = Buffer.allocUnsafe(len);\nfs.readSync(this.fd, body, 0, len, this.off + 12);"
+            }
+          },
+          "right": {
+            "label": "v2 Proposed: Epoch-Pinned mmap Subarray",
+            "tone": "proposed",
+            "summary": "Pins a thread-local read epoch and returns a zero-copy view over immutable mapped pages.",
+            "items": [
+              "0.5 KiB metadata overhead per op (-99.2% heap allocation)",
+              "38.2 MiB/s sequential writeback with zero >100 ms stalls",
+              "Lock-free progress: readers never block writers or manifest CAS"
+            ],
+            "code": {
+              "language": "typescript",
+              "source": "const guard = this.epochs.pin();\ntry {\n  const len = this.view.getUint32(this.off, true);\n  return this.bytes.subarray(this.off + 12, this.off + 12 + len);\n} finally { guard.release(); }"
+            }
+          }
+        },
+        {
+          "type": "diagram",
+          "id": "epoch-reclamation-seq",
+          "title": "Deferred munmap Protocol Under Concurrent Slow Reader",
+          "kind": "sequence",
+          "caption": [
+            "Proves why Finding F-1 cannot recur once ",
+            { "code": "minActiveEpoch > retireEpoch" },
+            " gates reclamation ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ],
+          "evidence": ["ev-fsync-trace"],
+          "actors": [
+            { "id": "act-reader", "label": "Slow Cursor", "kind": "actor" },
+            { "id": "act-epochs", "label": "Epoch Table", "kind": "store" },
+            { "id": "act-compact", "label": "Compactor", "kind": "service" },
+            { "id": "act-sweeper", "label": "Segment Sweeper", "kind": "verifier" }
+          ],
+          "messages": [
+            { "from": "act-reader", "to": "act-epochs", "label": "pin() -> epoch 9103 on seg-000479", "kind": "sync" },
+            { "from": "act-compact", "to": "act-compact", "label": "fdatasync(seg-000481) + CRC-32C check", "kind": "self", "gate": true, "note": "1.84 ms durability gate" },
+            { "from": "act-compact", "to": "act-epochs", "label": "advance globalEpoch -> 9104", "kind": "sync" },
+            { "from": "act-compact", "to": "act-sweeper", "label": "enqueue(seg-000479, retireEpoch=9104)", "kind": "async" },
+            { "from": "act-sweeper", "to": "act-epochs", "label": "minActiveEpoch() == 9103 (<= 9104)", "kind": "reply", "note": "Defer munmap: 4 readers active" },
+            { "from": "act-reader", "to": "act-epochs", "label": "release(epoch 9103)", "kind": "async" },
+            { "from": "act-sweeper", "to": "act-sweeper", "label": "quiescent (> 9104): munmap + unlink", "kind": "self", "gate": true, "note": "Zero faults" }
+          ]
+        },
+        {
+          "type": "diagram",
+          "id": "wal-lifecycle-flow",
+          "title": "Five-Phase Segment Lifecycle & Fail-Closed Gates",
+          "kind": "flow",
+          "caption": "Gated transitions abort cleanly on I/O or checksum failure without mutating the live manifest.",
+          "steps": [
+            {
+              "label": "Append mmap",
+              "detail": "Writers claim frame offsets via atomic fetch_add in active 64 MiB slab."
+            },
+            {
+              "label": "Seal & CRC-32C",
+              "detail": "Write trailer, verify frame CRCs, and flush via fdatasync / F_FULLFSYNC.",
+              "gate": true
+            },
+            {
+              "label": "Manifest CAS",
+              "detail": "Swap manifest generation atomically using temp-file fsync + rename.",
+              "gate": true
+            },
+            {
+              "label": "Stamp Epoch",
+              "detail": "Record retireEpoch watermark on superseded segment descriptors."
+            },
+            {
+              "label": "Sweep & Unmap",
+              "detail": "Reclaim virtual pages and unlink files once minActiveEpoch > retireEpoch."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "telemetry",
+      "title": "Benchmark Telemetry & Tail-Latency Distributions",
+      "lede": "Grouped baseline-versus-candidate speedup charts, quantile whisker distributions against a 25 ms SLA budget, and full stage metrics across 14.4M operations.",
+      "blocks": [
+        {
+          "type": "metrics",
+          "items": [
+            { "label": "Total operations", "value": "14.4M", "evidence": ["ev-compaction-json"] },
+            { "label": "Sustained throughput", "value": "8,000", "unit": "ops/s", "evidence": ["ev-compaction-json"] },
+            { "label": "Seal fdatasync", "value": "1.84", "unit": "ms", "evidence": ["ev-fsync-trace"] },
+            { "label": "CRC mismatches", "value": "0", "evidence": ["ev-compaction-json"] }
+          ]
+        },
+        {
+          "type": "chart",
+          "id": "p99-speedup-chart",
+          "title": "Stage p99 Latency: Legacy Heap Copy vs. Zero-Copy mmap",
+          "kind": "comparison",
+          "baselineLabel": "v1 Legacy heap copy",
+          "candidateLabel": "v2 Zero-copy mmap",
+          "unit": "ms",
+          "higherIsBetter": false,
+          "evidence": ["ev-latency-csv", "ev-compaction-json"],
+          "caption": [
+            "Measured under 8 concurrent writers across 14.4M operations ",
+            { "cite": "ev-latency-csv" },
+            ". Speedup ratios are derived directly from series values."
+          ],
+          "series": [
+            { "label": "WAL append (p99)", "baseline": 148.4, "value": 4.6 },
+            { "label": "Segment seal (p99)", "baseline": 119.5, "value": 11.8 },
+            { "label": "Sparse index rebuild (p99)", "baseline": 134.0, "value": 22.4 }
+          ]
+        },
+        {
+          "type": "chart",
+          "id": "zero-copy-quantiles",
+          "title": "Zero-Copy Stage Latency Distribution (p50 / p95 / p99 / p99.9)",
+          "kind": "quantiles",
+          "unit": "ms",
+          "budget": 25,
+          "evidence": ["ev-latency-csv"],
+          "caption": [
+            "Every zero-copy stage holds p99 below the 25 ms shard SLA ceiling; dashed whiskers extend to p99.9 ",
+            { "cite": "ev-latency-csv" },
+            "."
+          ],
+          "series": [
+            { "label": "wal_append (zero-copy)", "p50": 0.4, "p95": 1.9, "p99": 4.6, "max": 11.2 },
+            { "label": "segment_seal (zero-copy)", "p50": 2.1, "p95": 6.4, "p99": 11.8, "max": 19.4 },
+            { "label": "index_rebuild (zero-copy)", "p50": 9.5, "p95": 16.2, "p99": 22.4, "max": 31.0 }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "stage-comparison-table",
+          "caption": "Complete latency and heap-allocation ledger (14.4M ops, 8 concurrent writers)",
+          "columns": [
+            { "key": "stage", "label": "Pipeline stage" },
+            { "key": "engine", "label": "Engine mode" },
+            { "key": "p50", "label": "p50 (ms)", "numeric": true },
+            { "key": "p95", "label": "p95 (ms)", "numeric": true },
+            { "key": "p99", "label": "p99 (ms)", "numeric": true },
+            { "key": "alloc", "label": "Alloc / op (KiB)", "numeric": true },
+            { "key": "proof", "label": "Evidence" }
+          ],
+          "rows": [
+            {
+              "stage": [{ "code": "wal_append" }],
+              "engine": "Legacy copy",
+              "p50": "1.2",
+              "p95": "18.4",
+              "p99": "148.4",
+              "alloc": "64.0",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            },
+            {
+              "stage": [{ "code": "wal_append" }],
+              "engine": [{ "strong": "Zero-copy mmap" }],
+              "p50": "0.4",
+              "p95": "1.9",
+              "p99": "4.6",
+              "alloc": "0.5",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            },
+            {
+              "stage": [{ "code": "segment_seal" }],
+              "engine": "Legacy copy",
+              "p50": "14.8",
+              "p95": "62.1",
+              "p99": "119.5",
+              "alloc": "512.0",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            },
+            {
+              "stage": [{ "code": "segment_seal" }],
+              "engine": [{ "strong": "Zero-copy mmap" }],
+              "p50": "2.1",
+              "p95": "6.4",
+              "p99": "11.8",
+              "alloc": "4.0",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            },
+            {
+              "stage": [{ "code": "index_rebuild" }],
+              "engine": "Legacy copy",
+              "p50": "48.0",
+              "p95": "91.3",
+              "p99": "134.0",
+              "alloc": "1024.0",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            },
+            {
+              "stage": [{ "code": "index_rebuild" }],
+              "engine": [{ "strong": "Zero-copy mmap" }],
+              "p50": "9.5",
+              "p95": "16.2",
+              "p99": "22.4",
+              "alloc": "16.0",
+              "proof": [{ "cite": "ev-latency-csv" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "findings",
+      "title": "Empirical Findings & Normative Specifications",
+      "lede": "Five findings spanning every severity, epistemic confidence state, and HR-004 verification band, followed by an EARS + Gherkin reclamation requirement.",
+      "blocks": [
+        {
+          "type": "finding",
+          "id": "F-1",
+          "title": "Immediate munmap after manifest CAS faults slow readers",
+          "severity": "critical",
+          "confidence": "defect",
+          "verification": { "band": "code", "detail": "fault-inject-slow-cursor" },
+          "claim": [
+            "Unmapping a compacted segment inside ",
+            { "code": "commitManifestSwap()" },
+            " triggers ",
+            { "code": "SIGBUS" },
+            " when any concurrent cursor still scans ",
+            { "code": "seg-000479" },
+            ". The sweeper MUST NOT call ",
+            { "code": "munmap()" },
+            " while any slot reports ",
+            { "code": "slotEpoch <= retireEpoch" },
+            " ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ],
+          "evidence": ["ev-fsync-trace"],
+          "detail": [
+            {
+              "type": "code",
+              "id": "epoch-guard-snippet",
+              "title": "src/wal/epoch-guard.ts — deferred munmap sweeper invariant",
+              "language": "typescript",
+              "highlight": [[3, 5]],
+              "source": "export function sweepRetiredSegments(queue: RetiredSegment[], minActiveEpoch: bigint): number {\n  let reclaimed = 0;\n  while (queue.length > 0 && queue[0].retireEpoch < minActiveEpoch) {\n    const seg = queue.shift()!;\n    seg.unmapAndClose(); // safe: zero readers can observe <= retireEpoch\n    reclaimed += 1;\n  }\n  return reclaimed;\n}"
+            }
+          ]
+        },
+        {
+          "type": "finding",
+          "id": "F-2",
+          "title": "Double-buffered heap copies drive 93.8% of page-cache churn",
+          "severity": "high",
+          "confidence": "proven",
+          "verification": { "band": "code", "detail": "wal-bench-14m" },
+          "claim": [
+            "Removing intermediate ",
+            { "code": "Buffer.concat()" },
+            " copies cuts writeback from 612.5 MiB/s to 38.2 MiB/s and reduces append p99 from 148.4 ms to 4.6 ms ",
+            { "cite": "ev-compaction-json" },
+            "."
+          ],
+          "evidence": ["ev-compaction-json", "ev-latency-csv"]
+        },
+        {
+          "type": "finding",
+          "id": "F-3",
+          "title": "Two pre-faulted 64 MiB standby segments eliminate rollover stalls",
+          "severity": "medium",
+          "confidence": "recommended",
+          "verification": { "band": "judgment", "detail": "capacity-vs-burst rubric" },
+          "claim": [
+            "Each shard SHOULD maintain two warm standby segments (128 MiB) so writer bursts bypass ",
+            { "code": "fallocate()" },
+            " metadata contention ",
+            { "cite": "ev-latency-csv" },
+            "."
+          ],
+          "evidence": ["ev-latency-csv"]
+        },
+        {
+          "type": "finding",
+          "id": "F-4",
+          "title": "Bare-metal NVMe capacitor power-cut replay awaits rig execution",
+          "severity": "low",
+          "confidence": "open",
+          "verification": { "band": "needs-review", "detail": "hardware bench pending" },
+          "claim": [
+            "Software fault injection confirms torn CRC-32C rejection, but production cutover MUST wait for physical NVMe power-loss replay ",
+            { "cite": "ev-nvme-powerloss" },
+            "."
+          ],
+          "evidence": ["ev-nvme-powerloss", "ev-customer-keys"]
+        },
+        {
+          "type": "finding",
+          "id": "F-5",
+          "title": "CRC-32C frame trailers preserve v1 on-disk byte compatibility",
+          "severity": "info",
+          "confidence": "proven",
+          "verification": { "band": "review", "detail": "wire-format sign-off" },
+          "claim": [
+            "Little-endian headers and CRC-32C trailers match v1 segments byte-for-byte, enabling rolling upgrades without offline conversion ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ],
+          "evidence": ["ev-fsync-trace"]
+        },
+        {
+          "type": "requirement",
+          "id": "REQ-WAL-01",
+          "title": "Epoch-Guarded Segment Unmap & Lease Fallback",
+          "pattern": "state",
+          "verification": { "band": "code", "detail": "epoch-guard.spec.ts" },
+          "evidence": ["ev-fsync-trace"],
+          "statement": [
+            "WHILE any registered reader slot holds ",
+            { "code": "slotEpoch <= retireEpoch" },
+            ", the segment sweeper MUST retain the mapped file descriptor and MUST NOT unlink the backing segment file."
+          ],
+          "scenarios": [
+            {
+              "name": "Active slow reader blocks premature munmap",
+              "given": "seg-000479 is retired at retireEpoch 9104 and reader slot 3 holds epoch 9103",
+              "when": "sweepRetiredSegments() executes on its 25 ms tick",
+              "then": "seg-000479 remains mapped in queue and unmap count equals 0"
+            },
+            {
+              "name": "Quiescent watermark reclaims retired segment",
+              "given": "reader slot 3 releases epoch 9103 and minActiveEpoch advances to 9105",
+              "when": "sweepRetiredSegments() executes on the next tick",
+              "then": "seg-000479 is unmapped and unlinked with zero page faults"
+            },
+            {
+              "name": "Stuck cursor exceeds 30-second lease TTL",
+              "given": "reader slot 7 holds epoch 9103 for more than 30,000 ms",
+              "when": "the lease watchdog inspects active reader slots",
+              "then": "slot 7 copies remaining unread bytes to a bounded heap buffer and releases its mmap pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementation Listings & Patch Diff",
+      "lede": "Core compaction barrier, unified reader patch, production YAML profile, and deterministic CLI reproduction.",
+      "blocks": [
+        {
+          "type": "code",
+          "id": "seal-segment-ts",
+          "title": "src/wal/compactor.ts — sealAndSwapSegment()",
+          "language": "typescript",
+          "highlight": [[6, 9], [15, 17]],
+          "caption": [
+            "Lines 6–9 enforce the ",
+            { "code": "fdatasync" },
+            " + CRC-32C gate; lines 15–17 stamp ",
+            { "code": "retireEpoch" },
+            " before queueing ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ],
+          "source": "export async function sealAndSwapSegment(\n  ctx: CompactionContext,\n  nextSeg: MappedSegment,\n  obsolete: MappedSegment[],\n): Promise<ManifestRecord> {\n  nextSeg.writeTrailerAndSeal();\n  await nextSeg.syncToDisk({ fullSync: true });\n  if (!nextSeg.verifyCrc32c()) {\n    throw new WalIntegrityError('seal-crc-mismatch', nextSeg.id);\n  }\n  const current = await ctx.manifest.read();\n  const updated = await ctx.manifest.compareAndSwap({\n    expectGeneration: current.generation,\n    add: [nextSeg.descriptor()],\n    remove: obsolete.map((s) => s.id),\n  });\n  const retireEpoch = ctx.epochs.current();\n  ctx.retirementQueue.push(...obsolete.map((seg) => ({ seg, retireEpoch })));\n  return updated;\n}"
+        },
+        {
+          "type": "diff",
+          "id": "reader-slice-diff",
+          "title": "src/wal/reader.ts — replace heap Buffer slice with epoch-pinned subarray",
+          "language": "typescript",
+          "caption": "Replaces two heap allocations and two synchronous read syscalls with an epoch-guarded subarray view.",
+          "patch": "--- a/src/wal/reader.ts\n+++ b/src/wal/reader.ts\n@@ -28,11 +28,14 @@ export class SegmentCursor {\n   readNextFrame(): Uint8Array | null {\n     if (this.offset >= this.limit) return null;\n-    const header = Buffer.allocUnsafe(12);\n-    fs.readSync(this.fd, header, 0, 12, this.offset);\n-    const bodyLen = header.readUInt32LE(0);\n-    const payload = Buffer.allocUnsafe(bodyLen);\n-    fs.readSync(this.fd, payload, 0, bodyLen, this.offset + 12);\n+    const guard = this.epochs.pin();\n+    try {\n+      const bodyLen = this.view.getUint32(this.offset, true);\n+      const start = this.offset + 12;\n+      const payload = this.bytes.subarray(start, start + bodyLen);\n+      this.offset = start + bodyLen + 4;\n+      return payload;\n+    } finally {\n+      guard.release();\n+    }\n   }\n }"
+        },
+        {
+          "type": "code",
+          "id": "compaction-policy-yaml",
+          "title": "config/wal-compaction.yaml — proposed production profile",
+          "language": "yaml",
+          "source": "wal:\n  segment_bytes: 67108864        # 64 MiB immutable segments\n  standby_segments: 2            # 128 MiB warm ring reservation\n  sync_mode: fullfsync           # F_FULLFSYNC on Darwin, fdatasync on Linux\n  epoch_sweep_interval_ms: 25\n  reader_lease_ttl_ms: 30000\n  checksum: crc32c"
+        }
+      ]
+    },
+    {
+      "id": "decisions-and-risks",
+      "title": "MADR Decisions & 2-Up Risk Matrix",
+      "lede": "Architecture Decision Records with explicit context and consequences, paired with a dense 2-up operational risk grid.",
+      "blocks": [
+        {
+          "type": "decision",
+          "id": "D-1",
+          "question": "How many 64 MiB standby segments should each shard pre-allocate in its warm ring?",
+          "status": "needed",
+          "owner": "Maintainer",
+          "context": [
+            "Multi-tenant storage nodes host up to 64 shards per NVMe volume. On-demand ",
+            { "code": "fallocate()" },
+            " stalls writers for 14–40 ms under burst rollover, whereas excessive pre-allocation wastes idle disk capacity."
+          ],
+          "recommendation": [
+            "Pre-allocate ",
+            { "strong": "2 standby segments (128 MiB per shard)" },
+            " so back-to-back burst rollovers never block on extent allocation ",
+            { "cite": "ev-latency-csv" },
+            "."
+          ],
+          "alternatives": [
+            {
+              "label": "1 standby segment (64 MiB)",
+              "summary": "Halves idle disk footprint (4 GiB/node), but double-rollover bursts still block on fallocate()."
+            },
+            {
+              "label": "2 standby segments (128 MiB)",
+              "summary": "Absorbs double-rollover bursts with zero append-path stalls at a bounded 8 GiB/node reservation."
+            },
+            {
+              "label": "4 standby segments (256 MiB)",
+              "summary": "Reserves 16 GiB/node with negligible p99 gain over a 2-segment ring."
+            }
+          ],
+          "consequences": [
+            "Reserves 8 GiB of pre-allocated NVMe space per 64-shard storage node.",
+            "Removes filesystem allocator locks from the hot wal_append critical path."
+          ]
+        },
+        {
+          "type": "decision",
+          "id": "D-2",
+          "question": "Which checksum algorithm should guard sealed segment frames?",
+          "status": "decided",
+          "owner": "Storage Engine Group",
+          "context": "Every frame requires corruption detection at >1 GiB/s scan rates without breaking v1 segment readers.",
+          "recommendation": [
+            "Standardize on hardware-accelerated ",
+            { "code": "CRC-32C (Castagnoli)" },
+            " per frame plus SHA-256 over the sealed segment manifest."
+          ],
+          "alternatives": [
+            {
+              "label": "SHA-256 per frame",
+              "summary": "Cryptographic collision resistance, but adds 6× CPU overhead on <256 B frames."
+            },
+            {
+              "label": "CRC-32C per frame + SHA-256 per manifest",
+              "summary": "Single-cycle ARM64/x86_64 CRC instruction path with cryptographic manifest sealing.",
+              "chosen": true
+            },
+            {
+              "label": "xxHash64 per frame",
+              "summary": "Fast non-cryptographic hash, but breaks v1 wire compatibility."
+            }
+          ],
+          "consequences": [
+            "Preserves zero-downtime rolling upgrades alongside v1 segment readers.",
+            "Detects bit-rot at line rate while manifest SHA-256 seals whole-segment identity."
+          ]
+        },
+        {
+          "type": "risk",
+          "id": "R-1",
+          "title": "Stuck reader cursor pins retired mmap segments",
+          "likelihood": "medium",
+          "impact": "high",
+          "mitigation": [
+            "Enforce a 30 s reader lease TTL; expired cursors clone remaining unread bytes to a bounded heap buffer and release their mmap pin ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ]
+        },
+        {
+          "type": "risk",
+          "id": "R-2",
+          "title": "Container hits Linux vm.max_map_count ceiling",
+          "likelihood": "low",
+          "impact": "high",
+          "mitigation": [
+            "Startup preflight asserts ",
+            { "code": "vm.max_map_count >= 65530" },
+            " and caps mapped segments at 512 per process."
+          ]
+        },
+        {
+          "type": "risk",
+          "id": "R-3",
+          "title": "APFS F_FULLFSYNC latency spikes on developer laptops",
+          "likelihood": "high",
+          "impact": "low",
+          "mitigation": [
+            "NAND flush executes once per 64 MiB seal rather than per frame, bounding amortized cost below 2 ms ",
+            { "cite": "ev-fsync-trace" },
+            "."
+          ]
+        },
+        {
+          "type": "risk",
+          "id": "R-4",
+          "title": "Torn tail frame after ungraceful host power loss",
+          "likelihood": "medium",
+          "impact": "medium",
+          "mitigation": [
+            "Startup recovery truncates trailing frames failing CRC-32C verification before opening writer cursors ",
+            { "cite": "ev-nvme-powerloss" },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "appendices": [
+    {
+      "id": "testbed-spec",
+      "title": "Testbed & Normative Standards",
+      "lede": "Hardware profile and external standards governing this Canon v2 specimen.",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            ["Host profile: Apple M3 Max (16 cores, 64 GiB unified memory, APFS), recorded in ", { "code": "evidence/host-profile.txt" }, "."],
+            ["JSON canonicalization conforms to ", { "link": { "href": "https://www.rfc-editor.org/rfc/rfc8785", "text": "RFC 8785 (JSON Canonicalization Scheme)" } }, "."],
+            ["Normative keywords follow ", { "link": { "href": "https://www.rfc-editor.org/rfc/rfc8174", "text": "RFC 8174 / BCP 14" } }, "; browser sandboxing enforces ", { "link": { "href": "https://www.w3.org/TR/CSP3/", "text": "W3C CSP Level 3" } }, "."]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cutover-checklist",
+      "title": "Production Cutover Sequence",
+      "lede": "Ordered release gates required before enabling zero-copy compaction by default.",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Resolve Decision D-1 (warm standby ring segment count).",
+            ["Complete bare-metal NVMe capacitor power-cut replay (", { "code": "ev-nvme-powerloss" }, ")."],
+            "Run 72-hour shadow canary on one non-tenant storage shard.",
+            "Enable fleet-wide with automatic rollback if reader-lease timeouts exceed zero."
+          ]
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "sources": [
+      {
+        "label": "Canon repository branch",
+        "reference": "example/design-system (design-v2 worktree)",
+        "revision": "6f25afe916e14b927c6f1f7ffd23747317c5c259"
+      },
+      {
+        "label": "House Rules",
+        "reference": "example/standards/house-rules (HR-000..HR-005)"
+      },
+      {
+        "label": "Synthetic benchmark summary",
+        "reference": "scratch/specimen-v2/evidence/compaction-run.json",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "notes": [
+      "Side-by-side Canon v2 specimen paired with baseline ",
+      { "code": "canon-specimen" },
+      " to demonstrate Precision Archival Slate & Cobalt typography, SVG dataviz, and House Rules."
+    ]
+  }
+}

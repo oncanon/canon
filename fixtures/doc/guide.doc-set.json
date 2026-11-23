@@ -1,0 +1,11 @@
+{
+  "schema": "doc-set/v1",
+  "pages": [
+    { "id": "guide-install", "path": "/guide/install/", "source": "guide-install.doc.json" },
+    { "id": "guide-quick-start", "path": "/guide/quick-start/", "source": "guide-quick-start.doc.json" }
+  ],
+  "external": [
+    { "id": "cli", "path": "/cli/", "anchors": [] },
+    { "id": "schemas", "path": "/schemas/", "anchors": [] }
+  ]
+}

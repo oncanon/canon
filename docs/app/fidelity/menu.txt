@@ -1,0 +1,24 @@
+Healthy · serving 31 aliases  (disabled)
+---
+[redacted: private packet title] — g2
+[redacted: private packet title] — g1
+[redacted: private packet title] — g3
+[redacted: private packet title] — g1
+[redacted: private packet title] — g1
+[redacted: private packet title] — g1
+[redacted: private packet title] — g1
+[redacted: private packet title] — g2
++23 more — Open store in Finder  (disabled)
+---
+Copy URL  [⌘C]
+Visibility
+    Loopback
+    Tailnet  (checked)
+    Cloud…  (disabled)
+---
+Open store in Finder  [⌘O]
+Restart service  [⌘R]
+Stop service  [⇧⌘S]
+---
+Settings…  [⌘,]
+Quit Canon  [⌘Q]

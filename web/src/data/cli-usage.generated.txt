@@ -1,0 +1,50 @@
+usage:
+  canon build <report.json> --out <dir> [--receipt <file>] [--render-policy 1|2] [--reissue-of <packet-dir>]
+  canon verify <packet-dir> [--json] [--reissue-of <old-packet-dir>]
+  canon build-site <site-input.json> --out <dir> [--receipt <file>]
+  canon verify-site <bundle-dir> [--json]
+  canon build-docs <manifest.doc-set.json> --out <dir> [--receipt <file>]
+  canon verify-docs <bundle-dir> [--json]
+  canon publish <packet-dir> [--root <store>] [--build-receipt <file>] [--receipt <file>] [--allow-render-policy-1]
+  canon alias set <name> <content-id> [--root <store>] --expect-generation <n>
+  canon alias get <name> [--root <store>]
+  canon alias list [--root <store>]
+  canon status [--root <store>] [--state-dir <dir>]
+  canon archive <packet-dir> --out <file.tar>
+  canon key generate --out <path> | --print-once
+  canon brief <report.json> [--store <store>] --alias <name> [--out <dir>] [--render-policy 1|2] [--reissue-of <packet-dir>] [--allow-render-policy-1]
+  canon sitrep <site-input.json> [--store <store>] --alias <name> [--out <dir>]
+  canon serve --root <store> [--port <n>] [--host <ip> | --tailscale] [--expect-tailscale-address <ipv4> --expect-tailscale-name <dns-name>] [--allow-host <name>]... [--state-file <file>] [--pid-file <file>]
+  canon service start --root <store> [--state-dir dist/service] [--port 8791] [--host <ip> | --tailscale] [--expect-tailscale-address <ipv4> --expect-tailscale-name <dns-name>] [--allow-host <name>]...
+  canon service status|stop|restart [--state-dir dist/service]
+  canon service clean [--state-dir dist/service] [--store <store>]
+  canon --version | -v
+  canon --help | -h
+  canon publish <packet-dir> --target <name> --targets <file> [--grant upload] [--dry-run] [--allow-render-policy-1]
+  canon publish --site <site-bundle-dir> --target <name> --targets <file> [--grant upload] [--dry-run]
+  canon promote --target <name> --targets <file> --alias <name> --content-id <id> --expect-generation <n> [--grant promote] [--dry-run]
+  canon rollback --target <name> --targets <file> --alias <name> --to <content-id> --expect-generation <n> [--grant promote] [--dry-run]
+  canon reconcile --target <name> --targets <file> [--grant promote]
+
+  V2 targets: grants are explicit and separate (upload; promote). No command deletes,
+  changes DNS or exposes a target publicly. A real cloudflare target is refused unless its
+  target file sets an https://<worker>.workers.dev endpoint, its credential variable is
+  set, and the command carries a grant.
+  --dry-run prints the writes the command would send and sends nothing: it builds no
+  transport and reads no credential.
+
+  Binding: loopback (127.0.0.1) by default. A non-loopback bind must be named:
+  --host <ip> (an IP literal on a local interface, private or Tailscale range) or
+  --tailscale. Wildcards (0.0.0.0, ::), public, and link-local addresses are
+  always refused. There is no authentication: anyone who can reach the bound
+  address can read every packet in the store.
+  --tailscale must name the node you expect, with --expect-tailscale-address
+  and --expect-tailscale-name (its Self DNS name): a machine can run more than
+  one Tailscale node, and any other node the tailscale CLI answers for is
+  refused before listening. Read the values with "tailscale ip -4" and
+  "tailscale status --json" (Self.DNSName, without the trailing dot).
+
+  Render policy: --render-policy defaults to render-policy/1. Once that default is
+  render-policy/2, publishing a render-policy/1 packet into a store (publish, brief,
+  publish --target) is refused unless --allow-render-policy-1 is given, and the override
+  is recorded in the receipt. Aliases may still point at any packet already in the store.

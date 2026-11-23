@@ -1,0 +1,57 @@
+---
+// page05's numbered section head: a 2px ink rule (the kanōn), a mono number
+// and a Libron title on one baseline. With content in the default slot (the
+// exit-code pills on "CLI surface") the row becomes page05's split variant:
+// space-between, gap 12px, padding-bottom 8px.
+interface Props {
+  num: string;
+  title: string;
+  as?: "h1" | "h2";
+  /** Anchor id for the heading (search links sections to it). */
+  id?: string;
+}
+const { num, title, as: Tag = "h2", id }: Props = Astro.props;
+const split = Astro.slots.has("default");
+---
+<div class:list={["sh", { "sh--split": split }]}>
+  {split ? (
+    <>
+      <div class="sh__lead"><span class="sh__num">{num}</span><Tag class="sh__title" id={id}>{title}</Tag></div>
+      <slot />
+    </>
+  ) : (
+    <>
+      <span class="sh__num">{num}</span><Tag class="sh__title" id={id}>{title}</Tag>
+    </>
+  )}
+</div>
+
+<style>
+  .sh {
+    /* flex-wrap; baseline; gap 18px; border-top 2px #0f172a; padding-top 14px */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 18px;
+    border-top: 2px solid var(--ink);
+    padding-top: 14px;
+    line-height: normal;
+  }
+  .sh--split { justify-content: space-between; gap: 12px; padding-bottom: 8px; }
+  .sh__lead { display: flex; align-items: baseline; gap: 18px; }
+  .sh__num {
+    /* JetBrains Mono 700 15px #1e40af */
+    font-family: var(--font-code);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent-ink);
+  }
+  .sh__title {
+    /* Libron 700 2.5rem / 1.1 */
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.5rem;
+    line-height: 1.1;
+  }
+</style>

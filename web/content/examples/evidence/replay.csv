@@ -1,0 +1,3 @@
+policy,hit_rate
+fifo,0.71
+lru,0.88

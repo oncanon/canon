@@ -1,0 +1,19 @@
+# Copy to test.tfvars. Every value here is an identifier, never a secret: the API
+# token comes only from the CLOUDFLARE_API_TOKEN environment variable, and the
+# service token's client secret never enters Terraform (runbook step 4).
+account_id        = "<cloudflare-account-id>"
+run_id            = "20260927-a1"
+workers_subdomain = "<sub>"
+team_domain       = "https://<team>.cloudflareaccess.com"
+
+# Reviewers (exact-person mode, the default): the addresses allowed in.
+access_mode     = "exact-person"
+reviewer_emails = ["<reviewer@example.com>"]
+# idp-domain mode instead:
+# access_mode           = "idp-domain"
+# reviewer_email_domain = "<example.com>"
+# identity_provider_id  = "<access-idp-id>"  # from runbook step 5 (the identity provider, configured once)
+
+# From runbook step 4 (the service token, created in the dashboard): its ID and Client ID.
+service_token_id         = "<service-token-id>"
+service_token_client_ids = ["<client-id>.access"]

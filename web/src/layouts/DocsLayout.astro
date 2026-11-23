@@ -1,0 +1,26 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import "../styles/doc.css";
+
+interface Props {
+  title: string;
+  eyebrow: string;
+  /** One plain sentence saying what the page is; shown as the lede and used for meta/JSON-LD/llms.txt. */
+  description: string;
+  current?: "guide" | "cli" | "schemas" | "canon-app";
+}
+const { title, eyebrow, description, current }: Props = Astro.props;
+---
+<BaseLayout title={title} description={description} current={current}>
+  <article class="doc">
+    <div class="u-container doc__head">
+      <p class="doc__eyebrow" data-pagefind-ignore>{eyebrow}</p>
+      <h1 class="doc__title">{title}</h1>
+      <p class="doc__lede">{description}</p>
+    </div>
+    <div class="u-container doc__body">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+

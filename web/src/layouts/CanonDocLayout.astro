@@ -1,0 +1,22 @@
+---
+// A docs page Canon renders (doc/v1). Title, description and the whole
+// article body come from Canon's build: the sealed fragment is interpolated
+// as-is, on one line, so `canon-docs check` can find its exact bytes between
+// the wrapper's opening tag and its "</div>". Styling lives in DocsLayout's
+// shared rules (`.canon-doc`), never in the fragment.
+import BaseLayout from "./BaseLayout.astro";
+import { canonPage } from "../lib/canon";
+import "../styles/doc.css";
+
+interface Props {
+  id: string;
+  current?: "guide" | "cli" | "schemas" | "canon-app";
+}
+const { id, current } = Astro.props;
+const { page, html } = canonPage(id);
+---
+<BaseLayout title={page?.title ?? id} description={page?.description ?? id} current={current}>
+  <article class="doc">
+    <div class="u-container canon-doc" data-canon-fragment={id}><Fragment set:html={html} /></div>
+  </article>
+</BaseLayout>

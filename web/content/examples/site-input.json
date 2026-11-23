@@ -1,0 +1,47 @@
+{
+  "schema": "site-input/v1",
+  "title": "Weekly status",
+  "edition": {
+    "editionId": "2026-w47",
+    "editionDigest":
+      "9f2c0e4b7a1d3c5e8f6a2b4d0c1e3f5a7b9d2c4e6f8a0b1c3d5e7f9a2b4c6d8e",
+    "observedAt": "2026-11-18T12:00:00Z",
+    "coverage": { "from": "2026-11-11T00:00:00Z", "to": "2026-11-18T00:00:00Z" }
+  },
+  "registry": {
+    "version": "1",
+    "sha256":
+      "0c7d3e1f5a9b2c4d6e8f0a1b3c5d7e9f2a4b6c8d0e1f3a5b7c9d2e4f6a8b0c1d"
+  },
+  "areas": [
+    {
+      "areaRef": "platform",
+      "title": "Platform",
+      "counts": {
+        "waiting": 1, "moved": 3, "blocked": 0,
+        "coverage": "complete", "gapRefs": [], "unit": "items"
+      },
+      "projects": [{ "projectRef": "cache", "title": "Cache layer" }]
+    }
+  ],
+  "items": [
+    {
+      "itemRef": "cache-lru",
+      "areaRef": "platform",
+      "projectRef": "cache",
+      "title": "Switch eviction to LRU",
+      "age": "3 days",
+      "blocks": [{ "type": "paragraph", "text": "Waiting on review." }]
+    }
+  ],
+  "decisions": [],
+  "evidence": [
+    {
+      "id": "ev-none",
+      "title": "No evidence this week",
+      "kind": "unavailable",
+      "reason": "Nothing attached."
+    }
+  ],
+  "gaps": []
+}

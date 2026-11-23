@@ -1,0 +1,31 @@
+# VPS-1: an authenticating reverse proxy in front of `canon serve`.
+#
+# canon serve binds loopback only (docs/decisions/phase1-contract.md D6) and has no
+# authentication of its own: anyone who can reach the bound address can read every
+# packet in the store. On a VPS this proxy is what makes the service private: it is
+# the only process with a public listener, and it is the one that refuses a request
+# without credentials.
+#
+# VPS-2 (the regression this guards): canon serve independently refuses a Host header
+# it did not expect with 421 (src/server/server.mjs, allowedHostsFor in
+# src/server/bind.mjs). A reverse proxy MUST rewrite the Host header to the loopback
+# authority canon serve is bound to; one that forwards the client's original Host (the
+# public hostname or IP) is refused by canon serve itself, even after the proxy's own
+# auth already passed. Keep `header_up Host <bind-authority>` below: removing it is
+# exactly the regression test/unit/vps-proxy-examples.test.mjs checks for.
+#
+# Replace <public-name-or-ip>, the htpasswd line, and the upstream port for your setup.
+# Generate the password hash with: caddy hash-password
+
+<public-name-or-ip> {
+	tls internal
+
+	basic_auth {
+		reviewer <bcrypt-hash-from-caddy-hash-password>
+	}
+
+	# canon serve --root <store> --port 8791 (loopback default; no --host/--tailscale)
+	reverse_proxy 127.0.0.1:8791 {
+		header_up Host 127.0.0.1:8791
+	}
+}

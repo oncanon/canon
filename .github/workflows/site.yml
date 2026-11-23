@@ -1,0 +1,58 @@
+# Builds oncanon.com and deploys it to the Cloudflare Pages project "oncanon".
+# Push to main -> production (oncanon.com). Pull request from this repo -> preview deploy.
+# release.yml calls this after it commits a new appcast item, with ref: main.
+name: site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    # One group for every production deploy (push to main and the call from release.yml),
+    # so an older build can never finish after a newer one. Each pull request has its own.
+    concurrency:
+      group: site-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+        env:
+          ASTRO_TELEMETRY_DISABLED: "1"
+      - name: Check the appcast is in the build
+        run: node -e "const x=require('fs').readFileSync('web/dist/appcast.xml','utf8'); if(!x.includes('xmlns:sparkle=')) process.exit(1)"
+      - name: Deploy to Cloudflare Pages
+        # Fork pull requests get no secrets, so they build but do not deploy.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web
+          command: pages deploy dist --project-name=oncanon --branch=${{ github.event_name == 'pull_request' && github.head_ref || 'main' }} --commit-dirty=true

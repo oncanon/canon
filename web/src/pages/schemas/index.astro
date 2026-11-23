@@ -1,0 +1,97 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { BASE } from "../../lib/base";
+// Both examples are run through the real CLI on every build (scripts/check-examples.mjs).
+import reportExample from "../../../content/examples/report.json?raw";
+import siteExample from "../../../content/examples/site-input.json?raw";
+---
+<DocsLayout
+  title="Schemas"
+  eyebrow="Reference"
+  current="schemas"
+  description="Canon accepts two JSON source schemas, report/v1 and site-input/v1, and builds each into an immutable output, packet/v1 or site-bundle/v1; this page describes all four."
+>
+  <p>
+    Canon takes exactly one of two JSON source documents and turns it into exactly one of two
+    immutable, content-addressed directories. Both pairs share the same guarantees: an invalid
+    source fails the build, and <code>verify</code> recomputes every digest independently of the
+    builder.
+  </p>
+
+  <h2 id="report-v1-packet-v1">report/v1 <span class="u-mono">→</span> packet/v1</h2>
+  <p>
+    <code>report/v1</code> is a single technical brief. The schema is closed: an unknown member
+    fails validation, and markup escape hatches such as <code>html</code>, <code>style</code> or
+    <code>class</code> get their own error.
+  </p>
+  <ul>
+    <li><code>schema</code>, <code>id</code> (lowercase letters, digits and hyphens) and <code>title</code>.</li>
+    <li><code>metadata</code>: <code>status</code> (<code>draft</code>, <code>proposed</code> or <code>final</code>), <code>classification</code>, <code>reviewDate</code> (YYYY-MM-DD), <code>authors</code> and <code>reviewRequest</code>.</li>
+    <li><code>summary</code>: a <code>verdict</code> (<code>confidence</code> plus <code>text</code>), one or more <code>paragraphs</code>, and optional <code>metrics</code>.</li>
+    <li><code>evidence</code>: at least one item. A <code>file</code> item has a <code>path</code> relative to the report's folder and a <code>mediaType</code> of <code>text/plain</code>, <code>text/csv</code> or <code>application/json</code>. A <code>redacted</code> or <code>unavailable</code> item gives a <code>reason</code> instead.</li>
+    <li><code>sections</code>: at least one, each with an <code>id</code>, a <code>title</code>, an optional <code>lede</code> and its <code>blocks</code>. Block types: <code>paragraph</code>, <code>list</code>, <code>code</code>, <code>diff</code>, <code>table</code>, <code>finding</code>, <code>decision</code>, <code>risk</code>, <code>requirement</code>, <code>comparison</code>, <code>chart</code>, <code>diagram</code> and <code>metrics</code>.</li>
+    <li><code>provenance</code>: at least one source (<code>label</code> plus <code>reference</code>), and optional <code>notes</code>.</li>
+    <li>Optional: <code>subtitle</code>, <code>appendices</code> (more sections) and <code>publication</code>.</li>
+  </ul>
+  <p>
+    A complete example, with one finding that cites one evidence file, <code>evidence/replay.csv</code>:
+  </p>
+  <pre><code>{reportExample.trimEnd()}</code></pre>
+  <p>
+    <code>canon build report.json --out packet/</code> turns that into a <code>packet/v1</code>
+    directory: <code>index.html</code> (human, the <code>entry</code>) and <code>report.md</code>
+    (agent, the <code>agentEntry</code>), built from the same validated report, plus the cited
+    evidence, fingerprinted <code>assets/</code>, <code>manifest.json</code> and
+    <code>checksums.json</code>. The manifest lists every file with its role, media type, size and
+    SHA-256; the packet's content ID is the SHA-256 of the canonical manifest itself, so two builds
+    of identical bytes get the same ID and a changed byte changes the ID.
+  </p>
+  <p>
+    Every summary, section, finding, decision, risk, figure and evidence heading gets a stable
+    anchor id, shared verbatim between <code>index.html</code> and <code>report.md</code> — so
+    <code>report.md#f-F-1</code> and <code>index.html#f-F-1</code> name the same block in both
+    artifacts. <code>canon verify packet/</code> recomputes every digest and the content ID and
+    exits non-zero on any mismatch; it never repairs.
+  </p>
+
+  <h2 id="site-input-v1-site-bundle-v1">site-input/v1 <span class="u-mono">→</span> site-bundle/v1</h2>
+  <p>
+    <code>site-input/v1</code> is a multi-page situation report. It is closed in the same way as
+    <code>report/v1</code>, and every member below is required unless marked optional.
+  </p>
+  <ul>
+    <li><code>schema</code> and <code>title</code>.</li>
+    <li><code>edition</code>: <code>editionId</code>, <code>editionDigest</code> (64 hex characters), <code>observedAt</code> and a <code>coverage</code> window (<code>from</code>, <code>to</code>), all times in UTC as <code>YYYY-MM-DDTHH:MM:SSZ</code>.</li>
+    <li><code>registry</code>: <code>version</code> and <code>sha256</code>.</li>
+    <li><code>areas</code>: each with an <code>areaRef</code>, a <code>title</code>, its <code>projects</code> (<code>projectRef</code>, <code>title</code>) and <code>counts</code>: <code>waiting</code>, <code>moved</code> and <code>blocked</code> (a whole number, or <code>null</code> when not recorded), a <code>coverage</code> of <code>complete</code>, <code>partial</code> or <code>unavailable</code>, the <code>gapRefs</code> that explain any shortfall, and a <code>unit</code>.</li>
+    <li><code>items</code>: each with an <code>itemRef</code>, an <code>areaRef</code> and <code>projectRef</code> (or <code>null</code>, with <code>gapRefs</code> saying why), a <code>title</code>, an <code>age</code> and its <code>blocks</code>: the <code>report/v1</code> block types except <code>decision</code>.</li>
+    <li><code>decisions</code>: each with a <code>decisionRef</code>, <code>label</code>, <code>kind</code>, the <code>itemRef</code> it belongs to, and its <code>questions</code> (options, a recommendation, and whether free text is allowed).</li>
+    <li><code>evidence</code>: at least one item, as in <code>report/v1</code>.</li>
+    <li><code>gaps</code>: each with a <code>gapRef</code>, a <code>kind</code> and <code>text</code>; the list may be empty.</li>
+    <li>Optional: <code>history</code>, the earlier editions (<code>editionId</code>, <code>contentId</code>, <code>observedAt</code>).</li>
+  </ul>
+  <p>A complete minimal example, with one area, one item and no decisions:</p>
+  <pre><code>{siteExample.trimEnd()}</code></pre>
+  <p>
+    <code>canon build-site site-input.json --out bundle/</code> turns that into a
+    <code>site-bundle/v1</code> directory — the same human/agent split as a packet, but across a
+    whole navigable set of pages instead of one. <code>canon verify-site bundle/</code> is the
+    independent verifier; it rejects anything that isn't a canonical <code>site-bundle/v1</code>
+    path, and refuses an HTML page that carries a verdict block not permitted in this schema.
+  </p>
+
+  <h2 id="shared-rules">Shared rules</h2>
+  <ul>
+    <li>Fail-closed: an invalid source document fails the build outright, with no partial output.</li>
+    <li>Content-addressed: the content ID is the SHA-256 of the canonical manifest — sorted keys, no incidental whitespace.</li>
+    <li>Two coequal leaves: a human HTML entry and an agent Markdown entry, generated from one validated source and sharing one set of block anchors.</li>
+    <li>Offline by design: both schemas render to zero-JS, zero-external-request output. Libron is vendored as fingerprinted local WOFF2.</li>
+  </ul>
+
+  <p>
+    See the <a href={`${BASE}cli/`}>CLI reference</a> for the exact <code>build</code> / <code>verify</code>
+    / <code>build-site</code> / <code>verify-site</code> invocations, and the
+    <a href={`${BASE}guide/quick-start/`}>quick start</a> for a worked <code>report/v1</code> example end
+    to end.
+  </p>
+</DocsLayout>

@@ -1,0 +1,107 @@
+@import "./tokens.generated.css";
+
+@font-face {
+  font-family: "Libron";
+  src: url("/fonts/libron/Libron-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libron";
+  src: url("/fonts/libron/Libron-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libron";
+  src: url("/fonts/libron/Libron-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libron";
+  src: url("/fonts/libron/Libron-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  /* Inter, latin subset, variable 400–700: the exact file and unicode-range
+     the page05 plate was rendered with (see public/fonts/inter/SOURCE.txt). */
+  font-family: "Inter";
+  src: url("/fonts/inter/Inter-latin-wght.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Display serif (Libron) for headings; Inter (vendored, as on the page05
+   plate) for all UI and body text; JetBrains Mono for code. */
+:root {
+  --font-display: var(--serif);
+  --font-body: var(--sans);
+  --font-code: var(--mono);
+  /* page05 nav: 10px + 12px link padding + 14px text + 12px + 10px + 1px rule. */
+  --nav-h: 62px;
+  /* page05 hero h1 size, scaled by 77/84 so Libron keeps page05's two-line
+     headline (the maintainer, 2026-11-18). Shared by the home hero and the 404 page. */
+  --hero-title-size: clamp(2.5667rem, 5.8667vw, 4.8125rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, h1, h2, h3, h4, p, ul, ol, dl, dd, figure, pre, blockquote { margin: 0; }
+
+html {
+  background: var(--paper);
+  color-scheme: light dark;
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+code, pre, kbd, samp {
+  font-family: var(--font-code);
+  font-size: 0.8125rem;
+}
+
+.u-container {
+  /* page05 containers: max-width 82rem including 20px side padding, so the
+     content box is at most 82rem - 40px. */
+  width: min(calc(82rem - 40px), calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.u-mono { font-family: var(--font-code); }
+.u-serif { font-family: var(--font-display); }
+
+::selection {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}

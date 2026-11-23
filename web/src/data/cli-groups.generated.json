@@ -1,0 +1,79 @@
+[
+  {
+    "id": "author",
+    "number": "2.1",
+    "title": "Author & inspect",
+    "summary": "Compile, verify, store, point an alias.",
+    "lines": [
+      "canon status [--root <store>] [--state-dir <dir>]",
+      "canon brief <report.json> [--store <store>] --alias <name> [--out <dir>] [--render-policy 1|2] [--reissue-of <packet-dir>] [--allow-render-policy-1]",
+      "canon sitrep <site-input.json> [--store <store>] --alias <name> [--out <dir>]",
+      "canon --version | -v",
+      "canon --help | -h"
+    ]
+  },
+  {
+    "id": "build",
+    "number": "2.2",
+    "title": "Build, verify & archive",
+    "summary": "Low-level steps, each checkable alone.",
+    "lines": [
+      "canon build <report.json> --out <dir> [--receipt <file>] [--render-policy 1|2] [--reissue-of <packet-dir>]",
+      "canon verify <packet-dir> [--json] [--reissue-of <old-packet-dir>]",
+      "canon build-site <site-input.json> --out <dir> [--receipt <file>]",
+      "canon verify-site <bundle-dir> [--json]",
+      "canon build-docs <manifest.doc-set.json> --out <dir> [--receipt <file>]",
+      "canon verify-docs <bundle-dir> [--json]",
+      "canon archive <packet-dir> --out <file.tar>"
+    ]
+  },
+  {
+    "id": "store",
+    "number": "2.3",
+    "title": "Store & aliases",
+    "summary": "Compare-and-swap prevents lost updates.",
+    "lines": [
+      "canon publish <packet-dir> [--root <store>] [--build-receipt <file>] [--receipt <file>] [--allow-render-policy-1]",
+      "canon alias set <name> <content-id> [--root <store>] --expect-generation <n>",
+      "canon alias get <name> [--root <store>]",
+      "canon alias list [--root <store>]"
+    ]
+  },
+  {
+    "id": "serve",
+    "number": "2.4",
+    "title": "Workstation server",
+    "summary": "Loopback by default; backs Canon.app.",
+    "lines": [
+      "canon serve --root <store> [--port <n>] [--host <ip> | --tailscale] [--expect-tailscale-address <ipv4> --expect-tailscale-name <dns-name>] [--allow-host <name>]... [--state-file <file>] [--pid-file <file>]",
+      "canon service start --root <store> [--state-dir dist/service] [--port 8791] [--host <ip> | --tailscale] [--expect-tailscale-address <ipv4> --expect-tailscale-name <dns-name>] [--allow-host <name>]...",
+      "canon service status|stop|restart [--state-dir dist/service]",
+      "canon service clean [--state-dir dist/service] [--store <store>]"
+    ]
+  },
+  {
+    "id": "remote",
+    "number": "2.5",
+    "title": "Remote targets",
+    "summary": "Gated: explicit grants, dry-run, zero delete.",
+    "lines": [
+      "canon key generate --out <path> | --print-once",
+      "canon publish <packet-dir> --target <name> --targets <file> [--grant upload] [--dry-run] [--allow-render-policy-1]",
+      "canon publish --site <site-bundle-dir> --target <name> --targets <file> [--grant upload] [--dry-run]",
+      "canon promote --target <name> --targets <file> --alias <name> --content-id <id> --expect-generation <n> [--grant promote] [--dry-run]",
+      "canon rollback --target <name> --targets <file> --alias <name> --to <content-id> --expect-generation <n> [--grant promote] [--dry-run]",
+      "canon reconcile --target <name> --targets <file> [--grant promote]"
+    ]
+  },
+  {
+    "id": "routes",
+    "number": "2.6",
+    "title": "Served routes",
+    "summary": "Mutable aliases → immutable editions.",
+    "lines": [
+      "/a/<alias>/  ·  /a/<alias>/report.md  ·  /a/<alias>.json",
+      "/p/sha256-<hex>/  ·  manifest.json",
+      "/healthz"
+    ]
+  }
+]
