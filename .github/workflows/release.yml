@@ -77,7 +77,32 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - name: Install the Playwright browsers the suite launches
+        run: node node_modules/playwright-core/cli.js install chromium webkit
+      - name: Install pandoc, at the major version the suite expects
+        run: |
+          brew install pandoc
+          pandoc --version
+          [[ "$(pandoc --version | head -1)" =~ ^pandoc\ 3\. ]] || { echo "::error::pandoc is not a 3.x release"; exit 1; }
+      - name: GROUP3-DIAG a detached child's cwd and environment, as the harness's own sweep would see them
+        run: |
+          node -e "
+          const { spawnSync, spawn } = require('node:child_process');
+          console.log('SIP:', spawnSync('csrutil', ['status'], { encoding: 'utf8' }).stdout.trim());
+          console.log('whoami:', spawnSync('whoami', [], { encoding: 'utf8' }).stdout.trim());
+          const c = spawn('/usr/bin/perl', ['-e', 'sleep 30'], { stdio: 'ignore', detached: true, env: { ...process.env, CANON_RED_RUN: 'deadbeefdeadbeefdeadbeefdeadbeef' } });
+          c.unref();
+          const pid = c.pid;
+          console.log('child pid:', pid);
+          const noEnv = spawnSync('ps', ['-ww', '-o', 'pid=,command=', '-p', String(pid)], { encoding: 'utf8' });
+          console.log('ps (no -E):', JSON.stringify(noEnv.stdout));
+          const withEnv = spawnSync('ps', ['-E', '-ww', '-o', 'pid=,command=', '-p', String(pid)], { encoding: 'utf8' });
+          console.log('ps -E:', JSON.stringify(withEnv.stdout));
+          console.log('ps -E includes token:', withEnv.stdout.includes('CANON_RED_RUN=deadbeefdeadbeefdeadbeefdeadbeef'));
+          const lsof = spawnSync('lsof', ['-a', '-d', 'cwd', '-p', String(pid), '-Fpn'], { encoding: 'utf8' });
+          console.log('lsof cwd:', JSON.stringify(lsof.stdout), lsof.status, lsof.error);
+          process.kill(pid, 'SIGKILL');
+          "
 
   cli:
     needs: check
