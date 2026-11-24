@@ -12,6 +12,7 @@
 // directory's serve process, so a recycled pid is never killed.
 import { spawn, spawnSync } from 'node:child_process';
 import { appendFile, link, lstat, mkdir, open, readdir, readFile, rename, rm, unlink } from 'node:fs/promises';
+import { fstatSync, ftruncateSync, readFileSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { createServer } from 'node:net';
 import { dirname, join, resolve } from 'node:path';
@@ -32,6 +33,32 @@ export class ServiceError extends Error {
 export function paths(stateDir) {
   const dir = resolve(stateDir);
   return { dir, state: join(dir, 'state.json'), config: join(dir, 'config.json'), log: join(dir, 'server.log'), events: join(dir, 'events.jsonl') };
+}
+
+// server.log keeps one rotated generation (server.log + server.log.1), each capped at
+// this many bytes: with successful /healthz requests no longer logged (src/server/server.mjs),
+// a surviving line is an error, a drift or a real request, so a few MB holds a long history;
+// two generations cap the service's own disk footprint at 10 MB, in line with its other
+// state files (state.json, events.jsonl) being small and bounded.
+export const DEFAULT_LOG_MAX_BYTES = 5 * 1024 * 1024;
+
+// Rotate fd's underlying file once it reaches maxBytes: copy it to `${path}.1`
+// (overwriting any previous one), then truncate fd to empty. fd MUST be open on path
+// with O_APPEND (as serve's own stdio and server.log's own writer are): truncating an
+// O_APPEND fd, rather than reopening it, is what keeps appends landing at the new,
+// empty end of file instead of leaving a gap. A caller with nothing to rotate against
+// (stdout/stderr pointed at a terminal or pipe, not a file) gets false back, untouched.
+export function rotateLogIfOversize(fd, path, maxBytes = DEFAULT_LOG_MAX_BYTES) {
+  let stat;
+  try {
+    stat = fstatSync(fd);
+  } catch {
+    return false;
+  }
+  if (!stat.isFile() || stat.size < maxBytes) return false;
+  writeFileSync(`${path}.1`, readFileSync(path));
+  ftruncateSync(fd, 0);
+  return true;
 }
 
 async function readJson(path) {
