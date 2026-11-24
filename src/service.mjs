@@ -12,7 +12,7 @@
 // directory's serve process, so a recycled pid is never killed.
 import { spawn, spawnSync } from 'node:child_process';
 import { appendFile, link, lstat, mkdir, open, readdir, readFile, rename, rm, unlink } from 'node:fs/promises';
-import { fstatSync, ftruncateSync, readFileSync, writeFileSync } from 'node:fs';
+import { fstatSync, ftruncateSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { createServer } from 'node:net';
 import { dirname, join, resolve } from 'node:path';
@@ -48,17 +48,22 @@ export const DEFAULT_LOG_MAX_BYTES = 5 * 1024 * 1024;
 // O_APPEND fd, rather than reopening it, is what keeps appends landing at the new,
 // empty end of file instead of leaving a gap. A caller with nothing to rotate against
 // (stdout/stderr pointed at a terminal or pipe, not a file) gets false back, untouched.
+// Never throws: this runs from the per-request log callback, where a thrown error
+// would crash the server or surface as an unhandled rejection over rotation, which
+// is allowed to just be skipped. path naming a different file than fd (or naming
+// nothing at all) is exactly such a skip, proven by comparing dev/ino, not just name.
 export function rotateLogIfOversize(fd, path, maxBytes = DEFAULT_LOG_MAX_BYTES) {
-  let stat;
   try {
-    stat = fstatSync(fd);
+    const fdStat = fstatSync(fd);
+    if (!fdStat.isFile() || fdStat.size < maxBytes) return false;
+    const pathStat = statSync(path);
+    if (pathStat.dev !== fdStat.dev || pathStat.ino !== fdStat.ino) return false;
+    writeFileSync(`${path}.1`, readFileSync(path));
+    ftruncateSync(fd, 0);
+    return true;
   } catch {
     return false;
   }
-  if (!stat.isFile() || stat.size < maxBytes) return false;
-  writeFileSync(`${path}.1`, readFileSync(path));
-  ftruncateSync(fd, 0);
-  return true;
 }
 
 async function readJson(path) {

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { closeSync, openSync, readFileSync, writeSync } from 'node:fs';
+import { closeSync, existsSync, openSync, readFileSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
 import { request } from 'node:http';
 import test from 'node:test';
@@ -80,4 +80,31 @@ test('[log-growth] rotateLogIfOversize is a no-op on a non-file fd (foreground s
 test('[log-growth] DEFAULT_LOG_MAX_BYTES is a small, explicit cap', () => {
   assert.ok(DEFAULT_LOG_MAX_BYTES > 0);
   assert.ok(DEFAULT_LOG_MAX_BYTES <= 10 * 1024 * 1024);
+});
+
+test('[log-growth] rotateLogIfOversize does not rotate when fd is open on a different file than path', async (t) => {
+  const dir = await tempDir(t, 'canon-log-rotate-mismatch');
+  const otherPath = join(dir, 'other.log');
+  const namedPath = join(dir, 'server.log');
+  const fd = openSync(otherPath, 'a');
+  t.after(() => closeSync(fd));
+  const maxBytes = 16;
+  writeSync(fd, Buffer.alloc(maxBytes + 1, 'x'));
+  writeFileSync(namedPath, Buffer.alloc(maxBytes + 1, 'y'));
+
+  assert.equal(rotateLogIfOversize(fd, namedPath, maxBytes), false);
+  assert.equal(existsSync(`${namedPath}.1`), false, 'namedPath was not copied');
+  assert.equal(readFileSync(otherPath).length, maxBytes + 1, 'fd was not truncated');
+  assert.equal(readFileSync(namedPath).length, maxBytes + 1, 'namedPath was not truncated');
+});
+
+test('[log-growth] rotateLogIfOversize returns false, not a throw, when path does not exist', async (t) => {
+  const dir = await tempDir(t, 'canon-log-rotate-missing');
+  const path = join(dir, 'server.log');
+  const fd = openSync(path, 'a');
+  t.after(() => closeSync(fd));
+  writeSync(fd, Buffer.alloc(16, 'x'));
+  unlinkSync(path);
+
+  assert.equal(rotateLogIfOversize(fd, path, 1), false);
 });
