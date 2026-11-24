@@ -1,4 +1,4 @@
-# oncanon.com: everything is public documentation. All crawlers are welcome,
+# oncanon.dev: everything is public documentation. All crawlers are welcome,
 # search engines and AI crawlers alike. The named groups below say the same
 # as "*"; they are listed so the intent is explicit.
 User-agent: *
@@ -16,4 +16,4 @@ User-agent: Applebot-Extended
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://oncanon.com/sitemap.xml
+Sitemap: https://oncanon.dev/sitemap.xml

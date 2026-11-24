@@ -1,5 +1,5 @@
-# Builds oncanon.com and deploys it to the Cloudflare Pages project "oncanon".
-# Push to main -> production (oncanon.com). Pull request from this repo -> preview deploy.
+# Builds oncanon.dev and deploys it to the Cloudflare Pages project "oncanon".
+# Push to main -> production (oncanon.dev). Pull request from this repo -> preview deploy.
 # release.yml calls this after it commits a new appcast item, with ref: main.
 name: site
 

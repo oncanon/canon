@@ -2,7 +2,7 @@
 // depend on (release pipeline, web/install-brew):
 //   1. dist/appcast.xml is well-formed XML: an RSS 2.0 root that declares the
 //      Sparkle namespace, and one channel titled "Canon" that links to
-//      https://oncanon.com/. Canon.app's SUFeedURL reads this file.
+//      https://oncanon.dev/. Canon.app's SUFeedURL reads this file.
 //   2. dist/_headers serves /appcast.xml as application/rss+xml with
 //      Cache-Control max-age=300.
 //   3. The install guide shows the cask command, then the formula command,
@@ -170,7 +170,7 @@ export function checkAppcast(xml) {
   if (channels.length !== 1) return [...errors, `appcast.xml has ${channels.length} <channel> elements, not 1`];
   const field = (n) => channels[0].children.filter((c) => c.name === n).map((c) => c.text.trim());
   if (field("title").join() !== "Canon") errors.push(`appcast.xml channel title is ${JSON.stringify(field("title"))}, not "Canon"`);
-  if (field("link").join() !== "https://oncanon.com/") errors.push(`appcast.xml channel link is ${JSON.stringify(field("link"))}, not "https://oncanon.com/"`);
+  if (field("link").join() !== "https://oncanon.dev/") errors.push(`appcast.xml channel link is ${JSON.stringify(field("link"))}, not "https://oncanon.dev/"`);
   return errors;
 }
 

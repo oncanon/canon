@@ -1,4 +1,4 @@
-# Canon docs (oncanon.com)
+# Canon docs (oncanon.dev)
 
 Astro site for the Canon docs and public pages. Local-only for now — see
 `AGENTS.md` at the repo root for the Phase 1 boundary.

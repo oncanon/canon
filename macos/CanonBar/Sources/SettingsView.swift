@@ -90,7 +90,7 @@ private struct GeneralSettings: View {
                     set: { updates.setAutomaticallyChecksForUpdates($0) }
                 )) {
                     Text("Automatically check for updates")
-                    Text(updates.isAvailable ? "From oncanon.com, signed by Canon." : "Not available in development builds.")
+                    Text(updates.isAvailable ? "From oncanon.dev, signed by Canon." : "Not available in development builds.")
                 }
                 .disabled(!updates.isAvailable)
             }

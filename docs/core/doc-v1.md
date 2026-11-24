@@ -1,12 +1,12 @@
 # `doc/v1`: Canon's docs content format
 
 Status: implemented on `core/doc-v1`, local only (no publication, deployment, or
-oncanon.com wiring performed from Canon Core)
+oncanon.dev wiring performed from Canon Core)
 
 ## What it is
 
 `doc/v1` is a closed-schema, single-page JSON content format for narrative docs pages
-(guides, reference pages, how-tos) — the kind of content oncanon.com needs that is
+(guides, reference pages, how-tos) — the kind of content oncanon.dev needs that is
 neither a review packet (`report/v1`, which carries a verdict and evidence) nor a
 multi-page review site (`site-input/v1`/`site-bundle/v1`). A `doc/v1` document has a
 title, a description, one or more sections of prose/list/code/table blocks, and no
@@ -328,7 +328,7 @@ fixtures.
 
 ## What's out of scope here
 
-No Cloudflare, DNS, deploy, or oncanon.com publication work was performed or authorized
+No Cloudflare, DNS, deploy, or oncanon.dev publication work was performed or authorized
 from Canon Core (Phase 1 boundary, `AGENTS.md`). The home page, 404, search, and the CLI
 GroupCard stay Astro-only — they are not `doc/v1` pages, and this format does not attempt
 to describe them.

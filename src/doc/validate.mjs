@@ -31,7 +31,7 @@ export const DOC_LIMITS = Object.freeze({
 
 // Lowercase kebab-case: every doc/v1 id becomes a literal HTML `id` attribute (a page
 // id doubles as a ref target; a section id doubles as its heading id), matching the
-// convention already live on oncanon.com so Pagefind's existing section anchors do not
+// convention already live on oncanon.dev so Pagefind's existing section anchors do not
 // move under it.
 export const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/;
 
