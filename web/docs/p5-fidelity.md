@@ -201,10 +201,10 @@ The sticky nav is 62px tall on one row but 141px when it wraps at 390, so `--nav
 
 ## Root move + SEO
 
-The maintainer's decision (2026-11-18 09:48 CT): the docs are the site, at the root of oncanon.com. Paths in the passes above that say `/docs/…` are historical; the same pages now live at `/…`.
+The maintainer's decision (2026-11-18 09:48 CT): the docs are the site, at the root of oncanon.dev. Paths in the passes above that say `/docs/…` are historical; the same pages now live at `/…`.
 
 **Root move.**
-- `astro.config.mjs`: `base: "/"`, `site: "https://oncanon.com"`. Every hand-written href, the preloads, the favicon, the font URLs and the search bundle go through `BASE`, so none needed a separate change. `scripts/screenshot.mjs` serves `dist/` at the root and serves `404.html` for missing paths.
+- `astro.config.mjs`: `base: "/"`, `site: "https://oncanon.dev"`. Every hand-written href, the preloads, the favicon, the font URLs and the search bundle go through `BASE`, so none needed a separate change. `scripts/screenshot.mjs` serves `dist/` at the root and serves `404.html` for missing paths.
 - `public/_redirects` (Cloudflare Pages): `/docs`, `/docs/` → `/` and `/docs/*` → `/:splat`, all 301. It does nothing until the site is deployed: locally `/docs/` is a 404.
 - Built output: no `/docs` string anywhere in `dist/` except `_redirects`.
 
@@ -217,7 +217,7 @@ The maintainer's decision (2026-11-18 09:48 CT): the docs are the site, at the r
 - 404: `src/pages/404.astro` → `dist/404.html`, noindex, kept out of search and the sitemap.
 
 **Invented for this pass (no plate; for the maintainer's review).** Superseded for the tile and the 404 title size; see "Plates pass" below.
-- The social card, `public/og/canon.png` (1200×630, `npm run og`). It has the nav bar with the UI lockup SVG and `oncanon.com`, then page05's hero eyebrow and headline (Libron 700, lh .98, −0.02em, 104px), then one terminal line in page05's terminal palette ("verified sha256 · md parity · anchors 1:1 exit 0", taken from the hero's "proposed output style" terminal). It uses only vendored fonts and page05 hex values.
+- The social card, `public/og/canon.png` (1200×630, `npm run og`). It has the nav bar with the UI lockup SVG and `oncanon.dev`, then page05's hero eyebrow and headline (Libron 700, lh .98, −0.02em, 104px), then one terminal line in page05's terminal palette ("verified sha256 · md parity · anchors 1:1 exit 0", taken from the hero's "proposed output style" terminal). It uses only vendored fonts and page05 hex values.
 - The logo tile, `public/og/canon-tile-512.png` (Organization.logo). It was Plate 2's 128px tile values scaled ×4 and rendered at ×1, which moved the C by a subpixel (0.839% of pixels off). It is now Plate 2's own 128px markup rendered at device scale 4; see "Plates pass".
 - The 404 page uses page05's hero band: #1b2434, the 14px #93c5fd eyebrow "404 · not found", the Libron title "This page isn't here." at page05's line-height and tracking, a smaller clamp (max 56px; now the home hero's size, see "Plates pass"), body copy in #e2e8f0, and three buttons (Guide primary, CLI reference and Home as ghosts). The band fills the viewport (404 page only).
 
@@ -321,7 +321,7 @@ Brief from the lead, 2026-11-18, relaying the maintainer ("I agree with all othe
 - `dist/` served with Cloudflare Pages' static rules: an unknown path gives HTTP 404 with `dist/404.html`, and there are no off-host requests at 1280 and 390;
 - the 404's computed styles against the page05 hero (band, row padding and gap, eyebrow, title, body, both buttons), and its title size against the home hero;
 - that the page05 hero crop is not blank;
-- `og:image` and `twitter:image` = `https://oncanon.com/og/canon.png` on every built page.
+- `og:image` and `twitter:image` = `https://oncanon.dev/og/canon.png` on every built page.
 
 It writes `tile-sbs.png`, `card-sbs.png`, `404-sbs.png`, `404-1280.png` and `404-390.png` to `.fidelity/plates/`. Negative tests: a removed `twitter:image`, a changed eyebrow colour and the old tile gave 5 failures. A blank hero crop gave 1 failure.
 

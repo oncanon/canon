@@ -13,7 +13,7 @@
 #     CANON_SIGN_IDENTITY  codesign identity ("Developer ID Application: …", or "-" for ad hoc)
 #     SPARKLE_PUBLIC_KEY   base64 EdDSA public key, written to SUPublicEDKey
 #   Optional env, for test builds only (docs/app/release.md):
-#     SPARKLE_FEED_URL     default https://oncanon.com/appcast.xml (https, or loopback http)
+#     SPARKLE_FEED_URL     default https://oncanon.dev/appcast.xml (https, or loopback http)
 #     CANON_VERSION        default: package.json version
 #     CANON_BUNDLE_ID      default: dev.oncanon.Canon
 #
@@ -45,7 +45,7 @@ if [ "$MODE" = release ]; then
   [ -n "$PUBLIC_KEY" ] || fail "SPARKLE_PUBLIC_KEY is not set"
   KEY_BYTES="$(printf '%s' "$PUBLIC_KEY" | base64 -D 2>/dev/null | wc -c | tr -d ' ')"
   [ "$KEY_BYTES" = 32 ] || fail "SPARKLE_PUBLIC_KEY is not a base64 32-byte EdDSA public key"
-  FEED_URL="${SPARKLE_FEED_URL:-https://oncanon.com/appcast.xml}"
+  FEED_URL="${SPARKLE_FEED_URL:-https://oncanon.dev/appcast.xml}"
   # Sparkle needs HTTPS. A loopback http feed is allowed for local update tests only.
   case "$FEED_URL" in
     https://*|http://127.0.0.1:*|http://localhost:*) ;;

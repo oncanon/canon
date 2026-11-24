@@ -27,12 +27,12 @@ import { decode, htmlToMarkdown, parse, helpers } from "./lib/html-to-md.mjs";
 // ---- CONFIG (Canon-specific) ------------------------------------------------
 const CONFIG = {
   name: "Canon",
-  origin: "https://oncanon.com",
+  origin: "https://oncanon.dev",
   // Reading order for llms.txt / llms-full.txt; pages not listed go last, by path.
   order: ["/", "/guide/", "/guide/install/", "/guide/quick-start/", "/schemas/", "/cli/", "/canon-app/", "/open-source/"],
   sections: { "/canon-app/": "Optional", "/open-source/": "Optional" },
   intro:
-    "Canon is offline-first tooling that runs on Node.js 22 or newer and is going public as open source. These are its docs; the whole set is also available as one Markdown file at https://oncanon.com/llms-full.txt.",
+    "Canon is offline-first tooling that runs on Node.js 22 or newer and is going public as open source. These are its docs; the whole set is also available as one Markdown file at https://oncanon.dev/llms-full.txt.",
   // What the HTML source leaves out or reshapes. Decorative copy is already
   // marked data-pagefind-ignore for search; the same marks apply here, except
   // table headers (ignored for search excerpts, but a Markdown table needs them).

@@ -40,7 +40,7 @@ h1 { font-family: Libron, serif; font-weight: 700; font-size: 104px; line-height
   font-family: "JetBrains Mono", monospace; font-size: 22px; white-space: pre; color: #f1f5f9; }
 .m { color: #9ca3af; } .p { color: #a7f3d0; font-weight: 700; }
 </style>
-<div class="bar">${lockup}<span class="host">oncanon.com</span></div>
+<div class="bar">${lockup}<span class="host">oncanon.dev</span></div>
 <div class="copy">
   <span class="eyebrow">Deterministic · offline-first · fail-closed</span>
   <h1>Sealed editions<br>for agent work.</h1>

@@ -1,6 +1,6 @@
 // doc/v1 -> a sealed HTML fragment. Astro (Canon Web) wraps this fragment byte-for-byte;
 // every heading keeps the page's own section id (no "sec-" prefix, unlike report/v1 —
-// Pagefind and the live oncanon.com pages already use plain ids and must not move).
+// Pagefind and the live oncanon.dev pages already use plain ids and must not move).
 //
 // A doc page has no evidence and no citations, so this module's inline() recognizes
 // `ref` instead of `cite` and never highlights RFC2119 keywords (report/v1's

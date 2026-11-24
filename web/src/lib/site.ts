@@ -6,7 +6,7 @@
 // rating, price or version: package.json is version 0.1.0, so none is claimed.
 export const SITE = {
   name: "Canon",
-  origin: "https://oncanon.com",
+  origin: "https://oncanon.dev",
   pitch:
     "Canon compiles structured JSON and bundled evidence into an immutable pair: a calm HTML publication for people and a byte-verified Markdown file for agents — fingerprinted, content-addressed, re-hashed on every read.",
   repository: "https://github.com/oncanon/canon",

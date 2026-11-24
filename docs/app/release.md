@@ -67,7 +67,7 @@ The script:
 2. Compiles for `arm64` and `x86_64` (macOS 14) and joins them with `lipo`.
 3. Copies `Sparkle.framework` into `Contents/Frameworks`. The binary has the rpath
    `@executable_path/../Frameworks`.
-4. Writes `SUFeedURL` (default `https://oncanon.com/appcast.xml`) and `SUPublicEDKey`. The feed
+4. Writes `SUFeedURL` (default `https://oncanon.dev/appcast.xml`) and `SUPublicEDKey`. The feed
    MUST be `https://`; only a loopback feed (`http://127.0.0.1:…`, `http://localhost:…`) may
    use http, for a local update test. It
    writes no `CanonFallbackCliScript`: a release build has no path of the build machine in it.
@@ -96,7 +96,7 @@ An ad hoc build cannot be notarized, so it MUST NOT be published.
 |---|---|---|---|
 | `CANON_SIGN_IDENTITY` | release | yes | `codesign` identity, or `-` for ad hoc |
 | `SPARKLE_PUBLIC_KEY` | release | yes | base64 EdDSA public key (32 bytes), written to `SUPublicEDKey` |
-| `SPARKLE_FEED_URL` | release | no | Feed URL, https or loopback http. Default `https://oncanon.com/appcast.xml`. Test builds only |
+| `SPARKLE_FEED_URL` | release | no | Feed URL, https or loopback http. Default `https://oncanon.dev/appcast.xml`. Test builds only |
 | `CANON_VERSION` | both | no | Version instead of `package.json`. Test builds only |
 | `CANON_BUNDLE_ID` | both | no | Bundle id instead of `dev.oncanon.Canon`. Test builds only |
 | `CANON_SPARKLE_DIR` | both | no | Where `fetch-sparkle.sh` keeps Sparkle. Default `<repo>/.build/sparkle` |

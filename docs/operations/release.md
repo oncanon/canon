@@ -33,7 +33,7 @@ GitHub App token or a fine-grained token instead (`token:` input in `release-ple
 
 - `canon-X.Y.Z.tgz` (output of `npm pack`) on the GitHub Release. The formula `oncanon/tap/canon` installs it with Homebrew's `node`.
 - `Canon-X.Y.Z.zip` on the GitHub Release: universal, Developer ID signed, hardened runtime, notarized and stapled. The cask `oncanon/tap/canon-app` installs it and depends on the formula.
-- One new item at the top of `web/public/appcast.xml`, committed to `main` as `chore(release): appcast vX.Y.Z`, then deployed to `https://oncanon.com/appcast.xml`. Canon.app reads this feed with Sparkle 2 and checks each update's EdDSA signature against `SUPublicEDKey` in its `Info.plist`.
+- One new item at the top of `web/public/appcast.xml`, committed to `main` as `chore(release): appcast vX.Y.Z`, then deployed to `https://oncanon.dev/appcast.xml`. Canon.app reads this feed with Sparkle 2 and checks each update's EdDSA signature against `SUPublicEDKey` in its `Info.plist`.
 - A commit on `oncanon/homebrew-tap` that sets the new version and both `sha256` values.
 
 If tests, the version check, signing, notarization or the Gatekeeper check fail, the `publish` job does not run: the Release stays a draft, nothing is uploaded, and neither the tap nor the appcast changes.
@@ -93,7 +93,7 @@ GitHub-hosted runners are single-use virtual machines, so these files do not out
    ```
 
    Store the private key in 1Password and in `SPARKLE_ED_PRIVATE_KEY`; set `SPARKLE_PUBLIC_KEY`. Losing the private key means installed apps can no longer accept updates, so keep the 1Password copy.
-4. **Cloudflare site project.** Create the project `oncanon` once, with `main` as its production branch, then add the custom domain `oncanon.com` to it in the dashboard. The DNS change is the account owner's step.
+4. **Cloudflare site project.** Create the project `oncanon` once, with `main` as its production branch, then add the custom domain `oncanon.dev` to it in the dashboard. The DNS change is the account owner's step.
 5. **Tap repository.** `oncanon/homebrew-tap`, public, containing `Formula/canon.rb`, `Casks/canon-app.rb` and its own `tests.yml` (style, strict audit, install). Its CI stays red until the first release: the formula and cask point at `v0.1.0` files that do not exist before then.
 6. **Environment.** Create `release` as described in [Secrets and variables](#secrets-and-variables).
 7. **Branch rules.** The `publish` job pushes the appcast commit to `main` as `github-actions[bot]`. A branch rule on `main` MUST allow that actor, or the job fails after the Release is published and before the tap changes; re-run `publish` after the rule is fixed.

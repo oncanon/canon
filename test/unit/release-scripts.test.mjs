@@ -7,7 +7,7 @@ const EMPTY = `<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>Canon</title>
-    <link>https://oncanon.com/</link>
+    <link>https://oncanon.dev/</link>
   </channel>
 </rss>
 `;
