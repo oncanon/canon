@@ -102,7 +102,8 @@ jobs:
       - name: The packed CLI installs and reports its version
         run: |
           prefix="$RUNNER_TEMP/prefix"
-          npm install --global --prefix "$prefix" "out/canon-$VERSION.tgz"
+          # "./" makes npm read a file path; "out/x.tgz" alone is read as the GitHub repo out/x.tgz.
+          npm install --global --prefix "$prefix" "./out/canon-$VERSION.tgz"
           [ "$("$prefix/bin/canon" --version)" = "$VERSION" ]
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
