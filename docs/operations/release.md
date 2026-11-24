@@ -118,4 +118,4 @@ GitHub-hosted runners are single-use virtual machines, so these files do not out
 
 Actions → release → Run workflow, with an existing tag and `dry_run` on. The run tests, packs, builds, signs, notarizes, staples and Gatekeeper-checks, then keeps `Canon-X.Y.Z.zip`, `canon-X.Y.Z.tgz` and `sparkle-signature.txt` as workflow artifacts. It publishes nothing.
 
-Homebrew installs only from public release files, so end users can install once `oncanon/canon` and `oncanon/homebrew-tap` are public.
+Homebrew installs only from public release files; `oncanon/canon` and `oncanon/homebrew-tap` have been public since 2026-11-23, so end users can install now.
