@@ -139,7 +139,11 @@ export function createPacketServer({ root, log = () => {}, names = [] }) {
       if (!res.headersSent) send(res, 500, { body: 'internal error\n' });
       else res.destroy();
     }).finally(() => {
-      log({ event: 'request', method: req.method, path: (req.url ?? '').split('?')[0], status: res.statusCode, ms: Number(process.hrtime.bigint() - started) / 1e6 });
+      const path = (req.url ?? '').split('?')[0];
+      // A successful /healthz is the overwhelming majority of traffic (Canon.app polls it
+      // every few seconds) and carries no information worth keeping; a failed one still does.
+      if (req.method === 'GET' && path === '/healthz' && res.statusCode === 200) return;
+      log({ event: 'request', method: req.method, path, status: res.statusCode, ms: Number(process.hrtime.bigint() - started) / 1e6 });
     });
   });
   return server;

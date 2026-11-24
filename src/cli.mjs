@@ -23,7 +23,7 @@ import { buildSiteBundle } from './site/build.mjs';
 import { SiteInputValidationError } from './site/validate.mjs';
 import { verifySiteBundle } from './site/verify.mjs';
 import { V2_USAGE, v2Promote, v2Publish, v2Reconcile, v2Rollback } from './publication/cli-v2.mjs';
-import { clean as serviceClean, restart as serviceRestart, ServiceError, start as serviceStart, startIdentity, status as serviceStatus, stop as serviceStop, readStateTolerant, writeStateAtomic } from './service.mjs';
+import { clean as serviceClean, paths as servicePaths, restart as serviceRestart, rotateLogIfOversize, ServiceError, start as serviceStart, startIdentity, status as serviceStatus, stop as serviceStop, readStateTolerant, writeStateAtomic } from './service.mjs';
 import { main as publisherKeygen } from '../scripts/public-target-keygen.mjs';
 
 const USAGE = `usage:
@@ -401,9 +401,16 @@ async function cmdServe(args) {
     'pid-file': { type: 'string' }, 'state-file': { type: 'string' }, ...EXPECT_TAILSCALE_OPTIONS,
   } });
   if (!values.root) usage('serve needs --root');
+  // Under `canon service start`, stdio fd 2 is server.log itself (src/service.mjs); rotate
+  // it in place once it grows past the cap. A foreground `canon serve` has no --state-file,
+  // so fd 2 is a terminal or pipe, rotateLogIfOversize is a no-op, and logging is unlimited.
+  const serveLogPath = values['state-file'] ? servicePaths(dirname(resolve(values['state-file']))).log : null;
   let started;
   try {
-    started = await startServer({ root: resolve(values.root), host: values.host, tailscale: values.tailscale, allowHosts: values['allow-host'], expectTailscale: expectTailscaleOf(values), port: Number(values.port), log: (entry) => console.error(JSON.stringify(entry)) });
+    started = await startServer({ root: resolve(values.root), host: values.host, tailscale: values.tailscale, allowHosts: values['allow-host'], expectTailscale: expectTailscaleOf(values), port: Number(values.port), log: (entry) => {
+      console.error(JSON.stringify(entry));
+      if (serveLogPath) rotateLogIfOversize(2, serveLogPath);
+    } });
   } catch (err) {
     if (!(err instanceof BindError) && err.code !== 'EADDRINUSE' && err.code !== 'EADDRNOTAVAIL') throw err;
     console.error(err.code === 'EADDRINUSE' ? `port ${values.port} is already in use; choose another --port` : err.message);
