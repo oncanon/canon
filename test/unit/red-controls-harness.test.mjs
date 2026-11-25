@@ -346,10 +346,12 @@ test('[PERF-1] a control whose unmutated tests leave a process in their group is
 });
 
 test('[HOST-SAFETY] a process that left its group and is found only by its working directory is reported and counted and is NOT stopped: the control is not red and the run fails', async () => {
-  // A detached /bin/sleep: it has left the run's session, and macOS shows no environment for it,
-  // so neither proof holds. The harness may not stop what it cannot prove it started.
+  // A detached stand-in with the run token stripped from its own environment: it carries no proof
+  // and names no copy by command line, so neither proof holds (the token is removed explicitly here,
+  // not left to a host's own process-introspection restrictions, which vary by machine and are not
+  // this test's business). The harness may not stop what it cannot prove it started.
   await withLeaks(async ({ recorded, alive }) => {
-    const results = await runControls(['R90'], { controls: [{ ...R90, tests: [...R90.tests, LEAK] }], afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true }")) });
+    const results = await runControls(['R90'], { controls: [{ ...R90, tests: [...R90.tests, LEAK] }], afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true, env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CANON_RED_RUN')) }")) });
     const [r] = results;
     const mine = recorded();
     assert.ok(mine.length >= 1, 'the plant did start and record its stand-in');
@@ -528,7 +530,7 @@ test('[PERF-1] a control whose intended test does not pass alone on the unmutate
 test('[PERF-1] a stray found only at run end unmakes every control that reused its owner\'s unmutated run', async () => {
   await withLeaks(async ({ recorded, alive }) => {
   const controls = twins(2).map((c) => ({ ...c, tests: [...c.tests, LEAK] }));
-  const results = await runControls(ids(controls), { controls, jobs: 1, afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true }")) });
+  const results = await runControls(ids(controls), { controls, jobs: 1, afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true, env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CANON_RED_RUN')) }")) });
   assert.equal(results[1].baselineReusedFrom, 'R90-1', 'the second control took the first one\'s baseline');
   assert.ok(results[0].strays?.some((s) => s.phase === 'run end'), `the stray is found at run end and is the first control's (${JSON.stringify(results[0].strays)})`);
   assert.deepEqual([results[1].reusedFromStrayOwner, results[1].wentRed], ['R90-1', false], 'so the second control is not red either');
@@ -540,7 +542,7 @@ test('[PERF-1] a stray found only at run end unmakes every control that reused i
 
 // The run-end sweep must answer within its time limit, or the run has proved nothing about strays.
 const withPath = async (path, fn) => { const saved = process.env.PATH; process.env.PATH = path; try { return await fn(); } finally { process.env.PATH = saved; } };
-const detachedLeak = async () => runControls(['R90'], { controls: [{ ...R90, tests: [...R90.tests, LEAK] }], afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true }")) });
+const detachedLeak = async () => runControls(['R90'], { controls: [{ ...R90, tests: [...R90.tests, LEAK] }], afterPrepare: (dir) => writeFile(join(dir, LEAK), leakTest("{ stdio: 'ignore', detached: true, env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CANON_RED_RUN')) }")) });
 
 test('[PERF-1] a run-end sweep that cannot ask lsof, or gets no answer in time, fails the run', async () => {
   await withLeaks(() => inPrivateTmp(async (priv) => {
@@ -635,8 +637,10 @@ const record = (pid) => { const p = { pid, start: startOf(pid) }; appendFileSync
 const until = async (ok, ms = 20_000) => { for (let waited = 0; waited < ms; waited += 100) { if (ok()) return true; await new Promise((r) => setTimeout(r, 100)); } return ok(); };
 // A plant: one test file that is the control's only test. The mutation target is never read.
 const PLANT_FILE = 'test/unit/zz-planted-host-safety.test.mjs';
-// KEEP: a platform-binary stand-in (perl shows no environment, as sleep does) that ends with its
-// test's private dir, 900 s at most (QA S6: it must not rely on its record alone).
+// KEEP: a lightweight stand-in for a long-running process that ends with its test's private dir,
+// 900 s at most (QA S6: it must not rely on its record alone). Where a plant below must carry no
+// proof of this run, it strips the run token from KEEP's own environment explicitly, rather than
+// relying on any host's process-introspection restrictions to hide it (those vary by machine).
 const RECORD_SELF = "const KEEP = ['-e', 'for (1 .. 900) { last unless -d $ARGV[0]; sleep 1 }', process.env.CANON_TEST_IDLE.slice(0, process.env.CANON_TEST_IDLE.lastIndexOf('/'))];\nconst lstart = (pid) => spawnSync('/bin/ps', ['-o', 'lstart=', '-p', String(pid)], { encoding: 'utf8', timeout: 10000, env: { ...process.env, LC_ALL: 'C', TZ: 'UTC' } }).stdout.trim().replace(/\\s+/g, ' ');\nconst rec = (pid) => appendFileSync(process.env.CANON_TEST_LEAKS, JSON.stringify({ pid, start: lstart(pid) }) + '\\n');\n";
 const plantSource = (body) => `import test from 'node:test';\nimport { spawn, spawnSync } from 'node:child_process';\nimport { appendFileSync } from 'node:fs';\n${RECORD_SELF}test('[plant] host safety', async () => {\n${body}\n});\n`;
 const planted = (body, id = 'PLANT-HOST') => ({
@@ -713,7 +717,7 @@ test('[HOST-SAFETY] a process whose command line names the copy but which the ru
 test('[HOST-SAFETY] a test that kills its own process group, holder included: the control and the run fail with the group unknown, and no number is signalled', async () => {
   await withLeaks(async ({ recorded, alive }) => {
     await withKillSpy(recorded, async (calls) => {
-      const plant = planted("const c = spawn('/usr/bin/perl', KEEP, { stdio: 'ignore', detached: true }); c.unref(); rec(c.pid); process.kill(0, 'SIGKILL'); await new Promise(() => {});");
+      const plant = planted("const c = spawn('/usr/bin/perl', KEEP, { stdio: 'ignore', detached: true, env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CANON_RED_RUN')) }); c.unref(); rec(c.pid); process.kill(0, 'SIGKILL'); await new Promise(() => {});");
       const results = await runControls(['PLANT-HOST'], { ...plant, jobs: 1 });
       const [r] = results;
       assert.match(r.error ?? '', /EHOLDERLOST .*its process group is unknown/, JSON.stringify(r));
@@ -738,7 +742,7 @@ test('[HOST-SAFETY] a test that kills its own process group, holder included: th
 test('[HOST-SAFETY] a process that left the group but holds the test file\'s output pipe: the run ends at its limit from inside the group, and neither a number nor that process is signalled', async () => {
   await withLeaks(async ({ recorded, alive }) => {
     await withKillSpy(recorded, async (calls) => {
-      const plant = planted("const c = spawn('/usr/bin/perl', KEEP, { stdio: ['ignore', 'inherit', 'inherit'], detached: true }); c.unref(); rec(c.pid);");
+      const plant = planted("const c = spawn('/usr/bin/perl', KEEP, { stdio: ['ignore', 'inherit', 'inherit'], detached: true, env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CANON_RED_RUN')) }); c.unref(); rec(c.pid);");
       const started = Date.now();
       const results = await withTimeout(8, () => runControls(['PLANT-HOST'], { ...plant, jobs: 1 }));
       const [r] = results;
