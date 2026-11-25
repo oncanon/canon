@@ -84,19 +84,7 @@ jobs:
           brew install pandoc
           pandoc --version
           [[ "$(pandoc --version | head -1)" =~ ^pandoc\ 3\. ]] || { echo "::error::pandoc is not a 3.x release"; exit 1; }
-      - name: TEMPORARY-BRANCH-PROOF the tag's own npm test may fail (it has no group-3 fix yet); continue so the branch-proof steps below still run
-        run: npm test
-        continue-on-error: true
-      - name: TEMPORARY-BRANCH-PROOF checks out this branch's own test code and runs it on this runner, since the job above checked out the immutable tag
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          path: branch-proof
-      - name: TEMPORARY-BRANCH-PROOF npm ci and npm test against the branch's own code
-        working-directory: branch-proof
-        run: |
-          npm ci
-          npm test
+      - run: npm test
 
   cli:
     needs: check
