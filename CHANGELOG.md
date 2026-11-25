@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/oncanon/canon/compare/v0.1.1...v0.1.2) (2026-11-25)
+
+
+### Bug Fixes
+
+* **test:** pin golden content-ID and version-generator assertions to their recorded version ([b9dfd52](https://github.com/oncanon/canon/commit/b9dfd5208a20cbebbc46242e053f9f3320bdfcd5))
+
 ## [0.1.1](https://github.com/oncanon/canon/compare/v0.1.0...v0.1.1) (2026-11-25)
 
 
