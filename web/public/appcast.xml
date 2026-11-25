@@ -5,5 +5,14 @@
     <link>https://oncanon.dev/</link>
     <description>Canon.app updates.</description>
     <language>en</language>
+    <item>
+      <title>Canon 0.1.2</title>
+      <pubDate>Wed, 25 Nov 2026 17:12:50 GMT</pubDate>
+      <sparkle:version>0.1.2</sparkle:version>
+      <sparkle:shortVersionString>0.1.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/oncanon/canon/releases/tag/v0.1.2</sparkle:fullReleaseNotesLink>
+      <enclosure url="https://github.com/oncanon/canon/releases/download/v0.1.2/Canon-0.1.2.zip" length="3546207" type="application/octet-stream" sparkle:edSignature="EIRLzqlcGQ6trSQVxfaSUDH12ekG3UF/3Eh9h7yz6Hy4Vx+EaGFUQ7ftVMY1johJ8niZ1EkgDNzgNasb5I65DQ=="/>
+    </item>
   </channel>
 </rss>
