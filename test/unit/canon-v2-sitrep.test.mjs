@@ -6740,7 +6740,6 @@ test('[Canon-v2 SitRep R25-DEFECTS-POS] astral emojis/letters, Cf/Mn boundary se
   const commonmark = require('commonmark');
   const cmParser = new commonmark.Parser();
   const cmHtml = new commonmark.HtmlRenderer();
-  const hasPandoc = spawnSync('pandoc', ['--version'], { encoding: 'utf8' }).status === 0;
 
   const dir = await mkdtemp(join(tmpdir(), 'canon-v2-r25-pos-'));
   try {
@@ -6805,22 +6804,20 @@ test('[Canon-v2 SitRep R25-DEFECTS-POS] astral emojis/letters, Cf/Mn boundary se
         );
       }
     }
-    if (hasPandoc) {
-      const pandocOut = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
-      assert.equal(pandocOut.status, 0);
-      for (const bp of boundaryParagraphs) {
-        if (bp.expectStrong) {
-          assert.ok(
-            pandocOut.stdout.includes(`<strong>${bp.expectStrong}</strong>`),
-            `pandoc -f gfm lost <strong>${bp.expectStrong}</strong> in SitRep index.md`,
-          );
-        }
-        if (bp.expectNoEmph) {
-          assert.ok(
-            !pandocOut.stdout.includes('<em>b</em>') && !pandocOut.stdout.includes('<em>\u2028a</em>'),
-            `pandoc -f gfm unexpectedly parsed authored _/* as <em>: ${pandocOut.stdout}`,
-          );
-        }
+    const pandocOut = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    assert.equal(pandocOut.status, 0, `pandoc must be installed for this suite (${pandocOut.error?.message ?? 'exit ' + pandocOut.status})`);
+    for (const bp of boundaryParagraphs) {
+      if (bp.expectStrong) {
+        assert.ok(
+          pandocOut.stdout.includes(`<strong>${bp.expectStrong}</strong>`),
+          `pandoc -f gfm lost <strong>${bp.expectStrong}</strong> in SitRep index.md`,
+        );
+      }
+      if (bp.expectNoEmph) {
+        assert.ok(
+          !pandocOut.stdout.includes('<em>b</em>') && !pandocOut.stdout.includes('<em>\u2028a</em>'),
+          `pandoc -f gfm unexpectedly parsed authored _/* as <em>: ${pandocOut.stdout}`,
+        );
       }
     }
 
@@ -9225,18 +9222,14 @@ test('[Canon-v2 SitRep R31-DEFECTS-POS] untampered cross-segment autolinks, cros
 
     const itemMd = await readFile(join(siteOutDir, 'item/wal-standby-ring/index.md'), 'utf8');
     const reportMd = await readFile(join(pktOutDir, 'report.md'), 'utf8');
-    const which = spawnSync('which', ['pandoc'], { encoding: 'utf8' });
-    if (which.status === 0) {
-      const pandocBin = which.stdout.trim();
-      for (const [label, md] of [['sitrep', itemMd], ['packet', reportMd]]) {
-        const pd = spawnSync(pandocBin, ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
-        assert.equal(pd.status, 0, pd.stderr);
-        assert.equal(/<(?:script|img|svg)\b/i.test(pd.stdout), false, `${label} pandoc HTML leaked raw HTML: ${pd.stdout}`);
-        assert.equal(pd.stdout.includes('mailto:'), false, `${label} pandoc HTML leaked mailto autolink: ${pd.stdout}`);
-        assert.equal(pd.stdout.includes('href="https://x.example'), false, `${label} pandoc HTML leaked bare https autolink: ${pd.stdout}`);
-        assert.equal(pd.stdout.includes('href="http://www.x.example'), false, `${label} pandoc HTML leaked bare www autolink: ${pd.stdout}`);
-        assert.equal(pd.stdout.includes('EntitySplit &amp;lt; and &amp;#60;'), true, `${label} pandoc HTML corrupted split entities: ${pd.stdout}`);
-      }
+    for (const [label, md] of [['sitrep', itemMd], ['packet', reportMd]]) {
+      const pd = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      assert.equal(pd.status, 0, pd.stderr || `pandoc must be installed for this suite (${pd.error?.message ?? 'exit ' + pd.status})`);
+      assert.equal(/<(?:script|img|svg)\b/i.test(pd.stdout), false, `${label} pandoc HTML leaked raw HTML: ${pd.stdout}`);
+      assert.equal(pd.stdout.includes('mailto:'), false, `${label} pandoc HTML leaked mailto autolink: ${pd.stdout}`);
+      assert.equal(pd.stdout.includes('href="https://x.example'), false, `${label} pandoc HTML leaked bare https autolink: ${pd.stdout}`);
+      assert.equal(pd.stdout.includes('href="http://www.x.example'), false, `${label} pandoc HTML leaked bare www autolink: ${pd.stdout}`);
+      assert.equal(pd.stdout.includes('EntitySplit &amp;lt; and &amp;#60;'), true, `${label} pandoc HTML corrupted split entities: ${pd.stdout}`);
     }
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -9582,16 +9575,12 @@ test('[Canon-v2 SitRep R32-DEFECTS-POS] untampered pipe-prefixed paragraphs, #-p
     const itemMd = await readFile(join(siteOutDir, 'item/wal-standby-ring/index.md'), 'utf8');
     const areaMd = await readFile(join(siteOutDir, 'area/runtime/index.md'), 'utf8');
     const reportMd = await readFile(join(pktOutDir, 'report.md'), 'utf8');
-    const which = spawnSync('which', ['pandoc'], { encoding: 'utf8' });
-    if (which.status === 0) {
-      const pandocBin = which.stdout.trim();
-      for (const [label, md] of [['sitrep-item', itemMd], ['sitrep-area', areaMd], ['packet-report', reportMd]]) {
-        const pd = spawnSync(pandocBin, ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
-        assert.equal(pd.status, 0, `${label} pandoc exit 0`);
-        assert.equal(/<del\b/i.test(pd.stdout), false, `${label} leaked <del> strikethrough in pandoc GFM: ${pd.stdout}`);
-        assert.equal(/class="math\b/i.test(pd.stdout), false, `${label} leaked Pandoc math in pandoc GFM: ${pd.stdout}`);
-        assert.equal(/href="https?:\/\/evil\.example/i.test(pd.stdout), false, `${label} leaked bare autolink in pandoc GFM: ${pd.stdout}`);
-      }
+    for (const [label, md] of [['sitrep-item', itemMd], ['sitrep-area', areaMd], ['packet-report', reportMd]]) {
+      const pd = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      assert.equal(pd.status, 0, `${label} pandoc must be installed for this suite (${pd.error?.message ?? 'exit ' + pd.status})`);
+      assert.equal(/<del\b/i.test(pd.stdout), false, `${label} leaked <del> strikethrough in pandoc GFM: ${pd.stdout}`);
+      assert.equal(/class="math\b/i.test(pd.stdout), false, `${label} leaked Pandoc math in pandoc GFM: ${pd.stdout}`);
+      assert.equal(/href="https?:\/\/evil\.example/i.test(pd.stdout), false, `${label} leaked bare autolink in pandoc GFM: ${pd.stdout}`);
     }
   } finally {
     await rm(dir, { recursive: true, force: true });
