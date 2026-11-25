@@ -10,13 +10,17 @@ import { BuildError, buildPacket } from '../../src/packet/build.mjs';
 import { blockNumberLabel, assignBlockNumbers } from '../../src/render/block-numbers.mjs';
 import { renderReportMarkdown } from '../../src/render/markdown.mjs';
 import { ReportValidationError, validateReport } from '../../src/report/validate.mjs';
-import { FIXTURE, REPO, runCli, sha256, tempDir } from '../helpers.mjs';
+import { TOOL } from '../../src/policy.mjs';
+import { contentIdBuiltAtVersion, FIXTURE, REPO, runCli, sha256, tempDir } from '../helpers.mjs';
 
 const SPECIMEN = join(REPO, 'fixtures/specimen-v2/canon-specimen-v2.report.json');
 const P2 = 'render-policy/2';
-// The policy/1 content ID of the golden fixture before render-policy/2 existed. It must
-// never move: policy/1 output is frozen.
+// The policy/1 content ID of the golden fixture before render-policy/2 existed, recorded
+// at package version 0.1.0. It must never move: policy/1 output is frozen. Comparisons
+// below recompute the content ID at build.version 0.1.0 so the assertion does not move
+// just because package.json's version does.
 const FIXTURE_POLICY1_ID = 'sha256-3632c33a430f5fafd6a4f7f42971a3d3fbcaf3efd60858b1918aada908d51231';
+const GOLDEN_VERSION = '0.1.0';
 
 const html = (packet) => packet.output.get('index.html').toString('utf8');
 const report = async (path) => JSON.parse(await readFile(path, 'utf8'));
@@ -40,11 +44,15 @@ async function withReport(t, source, mutate) {
   return path;
 }
 
-test('[R1-DEFAULT] the default build is still render-policy/1 and the golden fixture keeps its content ID', async () => {
+test('[R1-DEFAULT] the default build is still render-policy/1 and the golden fixture keeps its content ID', async (t) => {
   const dflt = await buildPacket({ reportPath: FIXTURE });
   const explicit = await buildPacket({ reportPath: FIXTURE, renderPolicy: 'render-policy/1' });
-  assert.equal(dflt.contentId, FIXTURE_POLICY1_ID);
-  assert.equal(explicit.contentId, FIXTURE_POLICY1_ID);
+  assert.equal(dflt.contentId, explicit.contentId, 'default and explicit render-policy/1 builds produce the same content ID');
+  assert.equal(dflt.manifest.build.version, TOOL.version);
+  assert.equal(explicit.manifest.build.version, TOOL.version);
+  // Recorded at package version 0.1.0; rebuilding the fixture under that version (not just
+  // patching the manifest) must reproduce the frozen golden exactly.
+  assert.equal(await contentIdBuiltAtVersion(t, GOLDEN_VERSION), FIXTURE_POLICY1_ID);
   assert.equal(dflt.manifest.build.renderPolicy, 'render-policy/1');
   assert.ok(!dflt.output.has('report.json'), 'policy/1 packets carry no report.json');
   assert.ok(!dflt.manifest.files.some((f) => f.path.endsWith('.woff2') && f.bytes === 21168), 'policy/1 embeds no JetBrains Mono');
@@ -202,7 +210,7 @@ test('[R5-STRUCTURE] body order, masthead formats, rail mirroring main sections,
   assert.ok(colophon.includes(`<code><b>${digest.slice(0, 8)}</b>${digest.slice(8)}</code>`));
   for (const href of ['report.md', 'manifest.json', 'checksums.json']) assert.ok(colophon.includes(`href="${href}"`), href);
   assert.ok(colophon.includes('canon verify &lt;packet-dir&gt;'));
-  assert.ok(colophon.includes('canon 0.1.0 · render-policy/2 · security-policy/1 · zero scripts, zero external requests'));
+  assert.ok(colophon.includes(`canon ${TOOL.version} · render-policy/2 · security-policy/1 · zero scripts, zero external requests`));
   for (const s of r.provenance.sources) assert.ok(colophon.includes(s.label.replace(/&/g, '&amp;').replace(/</g, '&lt;')));
   assert.ok(!page.includes('Epistemic &amp; severity legend'));
 });

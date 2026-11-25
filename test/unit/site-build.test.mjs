@@ -16,7 +16,8 @@ import { scanCssPolicy } from '../../src/packet/verify.mjs';
 import { siteAnchors, siteDecisions, sitePages } from '../../src/site/manifest.mjs';
 import { assembleSiteBundle, buildSiteBundle, collectSiteCitations, loadSiteInput } from '../../src/site/build.mjs';
 import { validateSiteInput } from '../../src/site/validate.mjs';
-import { REPO } from '../helpers.mjs';
+import { TOOL } from '../../src/policy.mjs';
+import { contentIdBuiltAtVersion, REPO } from '../helpers.mjs';
 
 const require = createRequire(import.meta.url);
 const AXE_SOURCE = await readFile(require.resolve('axe-core/axe.min.js'), 'utf8');
@@ -74,9 +75,12 @@ test('[SITE-S3] P8 determinism: building the same site input twice produces byte
   assert.notEqual(changed.contentId, baseline.contentId);
 });
 
-test('[SITE-S3] P10 packet/v1 invariance: existing report/v1 fixture builds to the exact same contentId', async () => {
+test('[SITE-S3] P10 packet/v1 invariance: existing report/v1 fixture builds to the exact same contentId', async (t) => {
   const pkt = await buildPacket({ reportPath: REPORT_FIXTURE });
-  assert.equal(pkt.contentId, 'sha256-3632c33a430f5fafd6a4f7f42971a3d3fbcaf3efd60858b1918aada908d51231');
+  assert.equal(pkt.manifest.build.version, TOOL.version);
+  // Recorded at package version 0.1.0; rebuilding the fixture under that version (not just
+  // patching the manifest) must reproduce the frozen golden exactly.
+  assert.equal(await contentIdBuiltAtVersion(t, '0.1.0', { reportPath: REPORT_FIXTURE }), 'sha256-3632c33a430f5fafd6a4f7f42971a3d3fbcaf3efd60858b1918aada908d51231');
 });
 
 test('[SITE-S3] manifest and checksums include every page, asset, evidence file, anchor and decision, with no act/ or data/decision/ files', () => {

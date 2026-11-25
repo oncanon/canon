@@ -10,18 +10,22 @@ import { buildPacket } from '../../src/packet/build.mjs';
 import { verifyPacket } from '../../src/packet/verify.mjs';
 import { publishPacket } from '../../src/publish/filesystem.mjs';
 import { SCHEMAS, validate } from '../../src/publication/schemas.mjs';
-import { FIXTURE, tempDir } from '../helpers.mjs';
+import { TOOL } from '../../src/policy.mjs';
+import { contentIdBuiltAtVersion, FIXTURE, tempDir } from '../helpers.mjs';
 import { syntheticPacket } from '../v2/harness.mjs';
 
 // The packet ID changes when the presentation asset set changes (Libron v0.25 is
 // now part of packet identity), while the optional publication extension remains
-// absent for an ordinary report/v1 source.
+// absent for an ordinary report/v1 source. Recorded at package version 0.1.0.
 const V1_GOLDEN = 'sha256-3632c33a430f5fafd6a4f7f42971a3d3fbcaf3efd60858b1918aada908d51231';
 
 test('[V2-1] the optional publication extension leaves V1 packets and content IDs unchanged', async (t) => {
   const dir = await tempDir(t, 'canon-v2-schema');
   const v1 = await buildPacket({ reportPath: FIXTURE, outDir: join(dir, 'v1') });
-  assert.equal(v1.contentId, V1_GOLDEN, 'the fixture (no extension) builds the V1 golden content ID');
+  assert.equal(v1.manifest.build.version, TOOL.version);
+  // Recorded at package version 0.1.0; rebuilding the fixture under that version (not just
+  // patching the manifest) must reproduce the frozen golden exactly.
+  assert.equal(await contentIdBuiltAtVersion(t, '0.1.0'), V1_GOLDEN, 'the fixture (no extension) builds the V1 golden content ID');
   const manifest = JSON.parse(await readFile(join(v1.outDir, 'manifest.json'), 'utf8'));
   assert.equal(Object.hasOwn(manifest.report, 'publication'), false);
   const ext = await syntheticPacket(dir, 'ext', { classification: 'confidential', dataOrigin: 'synthetic' });
