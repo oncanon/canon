@@ -711,9 +711,12 @@ test('[RV-R11] a packet sealed by another canon version reproduces with its reco
   const from = await base(t);
   const m = await readJson(join(from, 'manifest.json'));
   const was = `${m.build.tool} ${m.build.version}`;
+  // Guaranteed to differ from TOOL.version, whatever package.json's current version is
+  // (including when it happens to be 9.9.9 itself, as the version-independence proof sets it).
+  const other = TOOL.version === '9.9.9' ? '9.9.8' : '9.9.9';
   const dir = await mutant(t, from, {
-    html: (h) => h.split(`${was};`).join(`${m.build.tool} 9.9.9;`).split(`${was} ·`).join(`${m.build.tool} 9.9.9 ·`),
-    manifest: (x) => { x.build.version = '9.9.9'; },
+    html: (h) => h.split(`${was};`).join(`${m.build.tool} ${other};`).split(`${was} ·`).join(`${m.build.tool} ${other} ·`),
+    manifest: (x) => { x.build.version = other; },
   });
   const r = await verifyPacketFull(dir);
   assert.equal(r.ok, true, fmt(r.errors));
