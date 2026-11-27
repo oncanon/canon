@@ -5,8 +5,8 @@
 // character; nothing, for the zero-width separator &#8203;) changes the parse under
 // CommonMark (commonmark 0.31.2) or GFM (pandoc -f gfm). Each escape is judged alone,
 // against the whole document.
-import { spawnSync } from 'node:child_process';
 import * as commonmark from 'commonmark';
+import { pandocRun } from './helpers.mjs';
 
 const ASCII_PUNCT = /[!-/:-@[-`{-~]/;
 const REF = /^&(?:#[xX][0-9A-Fa-f]{1,6}|#[0-9]{1,7}|[A-Za-z][A-Za-z0-9]{1,31});/;
@@ -107,7 +107,7 @@ function mergeText(tree) {
 }
 
 export function pandocTree(md, pandoc = 'pandoc') {
-  const r = spawnSync(pandoc, ['-f', 'gfm', '-t', 'json', '--preserve-tabs'], { input: md, encoding: 'utf8', maxBuffer: 1 << 27 });
+  const r = pandocRun(['-f', 'gfm', '-t', 'json', '--preserve-tabs'], { input: md, maxBuffer: 1 << 27 }, pandoc);
   if (r.status !== 0) throw new Error(r.stderr);
   const blocks = JSON.parse(r.stdout).blocks;
   // Merge Str/Space runs into text so tokenization differences are not structure.
