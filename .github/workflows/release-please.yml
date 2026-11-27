@@ -25,8 +25,6 @@ jobs:
       release_created: ${{ steps.rp.outputs.release_created }}
       tag_name: ${{ steps.rp.outputs.tag_name }}
       version: ${{ steps.rp.outputs.version }}
-      prs_created: ${{ steps.rp.outputs.prs_created }}
-      pr: ${{ steps.rp.outputs.pr }}
     steps:
       - id: rp
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
@@ -35,16 +33,39 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # The release PR is opened with GITHUB_TOKEN, so its pull_request runs start no jobs (seen on PR #6).
-  # Test its branch here each time release-please opens or updates it: it is the commit that bumps
-  # the version, and the release tag is cut from it on merge.
-  test-release-pr:
+  # So test it here on every push to main, not only when release-please opens or updates it: a push
+  # that the changelog ignores (ci:, test:) leaves the PR as it was but changes what a merge ships.
+  # The tested commit is GitHub's merge of the PR onto this push, which is the code a merge releases.
+  find-release-pr:
     needs: release-please
-    if: needs.release-please.outputs.prs_created == 'true'
+    if: needs.release-please.outputs.release_created != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      found: ${{ steps.find.outputs.found }}
+      sha: ${{ steps.find.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.sha }}
+        run: .github/scripts/release-pr-merge-ref.sh
+
+  test-release-pr:
+    needs: find-release-pr
+    if: needs.find-release-pr.outputs.found == 'true'
     permissions:
       contents: read
     uses: ./.github/workflows/test.yml
     with:
-      ref: ${{ fromJSON(needs.release-please.outputs.pr).headBranchName }}
+      ref: ${{ needs.find-release-pr.outputs.sha }}
 
   release:
     needs: release-please

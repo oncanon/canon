@@ -1,8 +1,8 @@
 # Runs the full test suite on macOS with every external tool it needs.
 # - Pull request to main -> tests the PR's merge commit.
 # - workflow_call -> tests the given ref. release.yml calls it for the release tag. release-please.yml
-#   calls it for its own release PR branch, because a PR opened with GITHUB_TOKEN gets no working
-#   pull_request workflow, and that PR is the one that bumps the version.
+#   calls it for the merge of its open release PR onto main, because a PR opened with GITHUB_TOKEN
+#   gets no working pull_request workflow, and that PR is the one that bumps the version.
 name: test
 
 on:
