@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { pandocRun } from '../helpers.mjs';
 import { canonicalBytes } from '../../src/canonical-json.mjs';
 import { contentIdFromIdentityBytes, sha256Hex } from '../../src/hash.mjs';
 import { buildPacket } from '../../src/packet/build.mjs';
@@ -6804,7 +6804,7 @@ test('[Canon-v2 SitRep R25-DEFECTS-POS] astral emojis/letters, Cf/Mn boundary se
         );
       }
     }
-    const pandocOut = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    const pandocOut = pandocRun(['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
     assert.equal(pandocOut.status, 0, `pandoc must be installed for this suite (${pandocOut.error?.message ?? 'exit ' + pandocOut.status})`);
     for (const bp of boundaryParagraphs) {
       if (bp.expectStrong) {
@@ -8388,7 +8388,7 @@ test('[Canon-v2 SitRep R29-DEFECTS-POS] buildSiteBundle, verifySiteBundle, and b
     assert.match(cmItemHtml, /<a href="#ev-ev-latency-csv">E1<\/a>\u200b<a href="https:\/\/example\.com\/e2">E2<\/a>/);
     assert.match(cmItemHtml, /<a href="#ev-ev-latency-csv">E1<\/a>\u200b<a href="https:\/\/example\.com\/plain">plain-link<\/a>/);
 
-    const pdItem = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html', '--wrap=none'], { input: itemMd, encoding: 'utf8' });
+    const pdItem = pandocRun(['-f', 'gfm', '-t', 'html', '--wrap=none'], { input: itemMd, encoding: 'utf8' });
     assert.equal(pdItem.status, 0, pdItem.stderr);
     assert.match(pdItem.stdout, /<a href="#ev-ev-latency-csv">E1<\/a>\u200b<a href="#ev-ev-compaction-json">E2<\/a>/);
     assert.match(pdItem.stdout, /<a href="#ev-ev-latency-csv">E1<\/a>\u200b<a href="https:\/\/example\.com\/e2">E2<\/a>/);
@@ -8898,7 +8898,7 @@ test('[Canon-v2 SitRep R30-DEFECTS-POS] buildSiteBundle and verifySiteBundle neu
       assert.ok(!cmHtml.includes('<img '), `unexpected <img> in commonmark.js for ${relMd}`);
       assert.ok(!cmHtml.includes('mailto:'), `unexpected mailto: autolink in commonmark.js for ${relMd}`);
 
-      const pd = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html', '--wrap=none'], { input: md, encoding: 'utf8' });
+      const pd = pandocRun(['-f', 'gfm', '-t', 'html', '--wrap=none'], { input: md, encoding: 'utf8' });
       assert.equal(pd.status, 0, pd.stderr);
       assert.ok(!pd.stdout.includes('#i-tailnet-host-pinning'), `unexpected #i-tailnet-host-pinning link in pandoc GFM for ${relMd}`);
       assert.ok(!pd.stdout.includes('#f-find-pass-file'), `unexpected #f-find-pass-file link in pandoc GFM for ${relMd}`);
@@ -9223,7 +9223,7 @@ test('[Canon-v2 SitRep R31-DEFECTS-POS] untampered cross-segment autolinks, cros
     const itemMd = await readFile(join(siteOutDir, 'item/wal-standby-ring/index.md'), 'utf8');
     const reportMd = await readFile(join(pktOutDir, 'report.md'), 'utf8');
     for (const [label, md] of [['sitrep', itemMd], ['packet', reportMd]]) {
-      const pd = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      const pd = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
       assert.equal(pd.status, 0, pd.stderr || `pandoc must be installed for this suite (${pd.error?.message ?? 'exit ' + pd.status})`);
       assert.equal(/<(?:script|img|svg)\b/i.test(pd.stdout), false, `${label} pandoc HTML leaked raw HTML: ${pd.stdout}`);
       assert.equal(pd.stdout.includes('mailto:'), false, `${label} pandoc HTML leaked mailto autolink: ${pd.stdout}`);
@@ -9576,7 +9576,7 @@ test('[Canon-v2 SitRep R32-DEFECTS-POS] untampered pipe-prefixed paragraphs, #-p
     const areaMd = await readFile(join(siteOutDir, 'area/runtime/index.md'), 'utf8');
     const reportMd = await readFile(join(pktOutDir, 'report.md'), 'utf8');
     for (const [label, md] of [['sitrep-item', itemMd], ['sitrep-area', areaMd], ['packet-report', reportMd]]) {
-      const pd = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      const pd = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
       assert.equal(pd.status, 0, `${label} pandoc must be installed for this suite (${pd.error?.message ?? 'exit ' + pd.status})`);
       assert.equal(/<del\b/i.test(pd.stdout), false, `${label} leaked <del> strikethrough in pandoc GFM: ${pd.stdout}`);
       assert.equal(/class="math\b/i.test(pd.stdout), false, `${label} leaked Pandoc math in pandoc GFM: ${pd.stdout}`);
@@ -9932,7 +9932,7 @@ test('[Canon-v2 SitRep R33-DEFECTS-POS] buildSiteBundle and verifySiteBundle acc
     assert.equal(res.ok, true, `expected R33 positive bundle to verify cleanly, got ${JSON.stringify(res.errors)}`);
 
     const itemMd = await readFile(join(outDir, 'item/wal-standby-ring/index.md'), 'utf8');
-    const gfm = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    const gfm = pandocRun(['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
     assert.equal(gfm.status, 0, gfm.stderr);
     assert.equal(gfm.stdout.includes('<img'), false, 'pandoc GFM must render zero <img> tags');
     assert.equal(gfm.stdout.includes('href="javascript:'), false, 'pandoc GFM must render zero javascript: links');
@@ -10321,7 +10321,7 @@ test('[Canon-v2 SitRep R34-DEFECTS-POS] buildSiteBundle and verifySiteBundle acc
     assert.equal(res.ok, true, `expected R34 positive bundle to verify cleanly, got ${JSON.stringify(res.errors)}`);
 
     const itemMd = await readFile(join(outDir, 'item/wal-standby-ring/index.md'), 'utf8');
-    const gfm = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    const gfm = pandocRun(['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
     assert.equal(gfm.status, 0, gfm.stderr);
     assert.equal(gfm.stdout.includes('<img'), false, 'pandoc GFM must render zero <img> tags');
     assert.equal(gfm.stdout.includes('href="javascript:'), false, 'pandoc GFM must render zero javascript: links');
@@ -10335,7 +10335,7 @@ test('[Canon-v2 SitRep R34-DEFECTS-REL-SOUNDNESS] relaxEscapes preserves delimit
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -10713,7 +10713,7 @@ test('[Canon-v2 SitRep R35-DEFECTS-REL-SOUNDNESS] relaxEscapes tracks CommonMark
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11010,7 +11010,7 @@ test('[Canon-v2 SitRep R36-DEFECTS-POS] buildSiteBundle/verifySiteBundle and bui
     assert.equal(res.ok, true, `expected R36 positive site-bundle to verify cleanly, got ${JSON.stringify(res.errors)}`);
 
     const itemMd = await readFile(join(outDir, 'item/wal-standby-ring/index.md'), 'utf8');
-    const gfm = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    const gfm = pandocRun(['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
     assert.equal(gfm.status, 0, gfm.stderr);
     assert.equal(gfm.stdout.includes('<h1 id="section"'), false);
   } finally {
@@ -11024,7 +11024,7 @@ test('[Canon-v2 SitRep R36-DEFECTS-REL-SOUNDNESS] relaxEscapes and prose preserv
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11235,7 +11235,7 @@ test('[Canon-v2 SitRep R37-DEFECTS-REL-SOUNDNESS] prose() escapes non-final Sete
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11408,7 +11408,7 @@ test('[Canon-v2 SitRep R38-DEFECTS-REL-SOUNDNESS] relaxEscapes preserves CommonM
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11510,7 +11510,7 @@ test('[Canon-v2 SitRep R39-DEFECTS-EMOJI] markdown.mjs and relax.mjs neutralize 
     const { prose } = await import('../../src/render/markdown.mjs');
     const { relaxEscapes } = await import('../../src/render/relax.mjs');
     const gfmRender = (md) => {
-      const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
       assert.equal(res.status, 0, res.stderr);
       return res.stdout;
     };
@@ -11567,12 +11567,12 @@ test('[Canon-v2 SitRep R39-DEFECTS-REL-SOUNDNESS] relaxEscapes runs dual CommonM
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
   const gfmJson = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'json'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'json'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11659,7 +11659,7 @@ test('[Canon-v2 SitRep R40-DEFECTS-EMOJI] joinPieces neutralizes cross-segment P
   const dir = await mkdtemp(join(tmpdir(), 'canon-v2-r40-emoji-'));
   try {
     const gfmRender = (md) => {
-      const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+      const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
       assert.equal(res.status, 0, res.stderr);
       return res.stdout;
     };
@@ -11697,7 +11697,7 @@ test('[Canon-v2 SitRep R40-DEFECTS-REL-SOUNDNESS] relaxEscapes derives all opaqu
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11754,7 +11754,7 @@ test('[Canon-v2 SitRep R41-DEFECTS-REL-SOUNDNESS] relaxEscapes preserves multi-l
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11828,7 +11828,7 @@ test('[Canon-v2 SitRep R42-DEFECTS-REL-SOUNDNESS] relaxEscapes evaluates \\[...\
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -11893,7 +11893,7 @@ test('[Canon-v2 SitRep R43-DEFECTS-REL-SOUNDNESS] relaxEscapes matches Autolink.
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -12005,7 +12005,7 @@ test('[Canon-v2 SitRep R44-DEFECTS-EMAIL-NEG] relaxEscapes and verifySiteBundle 
     assert.equal(baseVer.ok, true, `untampered SitRep bundle must verify cleanly, got ${JSON.stringify(baseVer.errors)}`);
     const targetRel = 'item/wal-standby-ring/index.md';
     const itemMd = await readFile(join(bundleDir, targetRel), 'utf8');
-    const pandocRes = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
+    const pandocRes = pandocRun(['-f', 'gfm', '-t', 'html'], { input: itemMd, encoding: 'utf8' });
     assert.equal(pandocRes.status, 0, pandocRes.stderr);
     assert.equal(pandocRes.stdout.includes('mailto:'), false, `${targetRel} leaked live mailto autolink:\n${pandocRes.stdout}`);
 
@@ -12061,7 +12061,7 @@ test('[Canon-v2 SitRep R44-DEFECTS-REL-SOUNDNESS] relaxEscapes keeps/relaxes con
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };
@@ -12224,7 +12224,7 @@ test('[Canon-v2 SitRep R45-DEFECTS-REL-SOUNDNESS] relaxEscapes preserves themati
   const commonmark = require('commonmark');
   const cmRender = (md) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(md));
   const gfmRender = (md) => {
-    const res = spawnSync('pandoc', ['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
+    const res = pandocRun(['-f', 'gfm', '-t', 'html'], { input: md, encoding: 'utf8' });
     assert.equal(res.status, 0, res.stderr);
     return res.stdout;
   };

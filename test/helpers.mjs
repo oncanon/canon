@@ -109,3 +109,16 @@ export function liveTailnet() {
 export async function exists(p) {
   return Boolean(await stat(p).catch(() => null));
 }
+
+// Runs pandoc and fails loudly, naming pandoc, when the binary is missing or
+// never starts (ENOENT), rather than letting a downstream assertion's silent
+// or generic message (e.g. an assert.equal message argument that evaluates to
+// undefined) hide the real cause. A pandoc that starts but exits non-zero for
+// a real content reason is returned as-is, for the caller's own assertion.
+export function pandocRun(args, opts = {}, bin = 'pandoc') {
+  const r = spawnSync(bin, args, { encoding: 'utf8', ...opts });
+  if (r.error || r.status === null) {
+    throw new Error(`pandoc must be installed for this suite (${r.error?.message ?? 'no exit status'})`);
+  }
+  return r;
+}
